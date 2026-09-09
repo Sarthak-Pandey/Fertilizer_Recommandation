@@ -1,0 +1,72 @@
+version: "3.9"
+
+services:
+  # ---------- ML Inference Service (internal only) ----------
+  ml-service:
+    build: ./ml-service
+    container_name: fertilizer-ml-service
+    environment:
+      - MODEL_VERSION=${MODEL_VERSION:-v1}
+      - PYTHONIOENCODING=utf-8
+    volumes:
+      - ./ml-service/models:/app/models:ro
+    # NOT exposed publicly -- only accessible via internal network
+    expose:
+      - "8001"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; r=httpx.get('http://localhost:8001/health'); assert r.status_code==200"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - internal
+
+  # ---------- Backend API Gateway (public) ----------
+  backend:
+    build: ./backend
+    container_name: fertilizer-backend
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    environment:
+      - ML_SERVICE_URL=http://ml-service:8001
+      - ML_REQUEST_TIMEOUT=${ML_REQUEST_TIMEOUT:-10}
+      - DATABASE_URL=${DATABASE_URL:-sqlite:///./predictions.db}
+      - MODEL_VERSION=${MODEL_VERSION:-v1}
+      - PYTHONIOENCODING=utf-8
+    depends_on:
+      ml-service:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - internal
+
+  # ---------- PostgreSQL (optional, for production) ----------
+  db:
+    image: postgres:16-alpine
+    container_name: fertilizer-db
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-fertilizer}
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - internal
+    profiles:
+      - postgres  # Only start when explicitly requested
+
+volumes:
+  pgdata:
+
+networks:
+  internal:
+    driver: bridge

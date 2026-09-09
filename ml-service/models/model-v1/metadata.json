@@ -1,0 +1,27 @@
+{
+    "model_version": "model-v1",
+    "model_artifact": "fertilizer_xgboost_pipeline.pkl",
+    "label_encoder": "target_label_encoder.pkl",
+    "preprocessing_version": "preprocessing-v1",
+    "feature_schema_version": "features-v1",
+    "dataset_version": null,
+    "training_date": null,
+    "git_commit": null,
+    "model_type": "XGBoost",
+    "features": [
+        "Soil_pH",
+        "Nitrogen_Level",
+        "Phosphorus_Level",
+        "Potassium_Level",
+        "Crop_Growth_Stage"
+    ],
+    "classes": [
+        "Compost",
+        "DAP",
+        "MOP",
+        "NPK/SSP_Blend",
+        "Urea",
+        "Zinc Sulphate"
+    ],
+    "metrics": {}
+}
