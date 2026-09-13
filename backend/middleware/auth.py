@@ -18,6 +18,8 @@ HEADER_API_KEY = "X-API-Key"
 
 # Paths exempt from authentication requirements
 PUBLIC_PATHS: Set[str] = {
+    "",
+    "/",
     "/api/v1/health",
     "/api/v1/ready",
     "/docs",

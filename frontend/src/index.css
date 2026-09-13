@@ -1,0 +1,211 @@
+@import "tailwindcss";
+
+/* ============================================================
+   FIELDWISE AGRONOMY CONSOLE — Design System
+   ============================================================ */
+
+@theme {
+  /* Brand Colors */
+  --color-fw-dark: #102D32;
+  --color-fw-dark-alt: #163238;
+  --color-fw-dark-mid: #20383D;
+  --color-fw-muted: #6E858B;
+  --color-fw-green: #4D947A;
+  --color-fw-yellow: #F2C14E;
+  --color-fw-cream: #F7F5EF;
+  --color-fw-cream-light: #FCFBF7;
+  --color-fw-mint: #E5EFEA;
+  --color-fw-yellow-light: #F8EDCF;
+  --color-fw-pink-light: #F5E4E1;
+  --color-fw-border: #DDD9CE;
+
+  /* Font families */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Sidebar */
+  --spacing-sidebar: 275px;
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-fw-cream);
+  color: var(--color-fw-dark);
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* ============================================================
+   GRID BACKGROUND
+   ============================================================ */
+
+.grid-background {
+  background-image:
+    linear-gradient(rgba(16, 45, 50, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16, 45, 50, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ============================================================
+   STEP LABELS
+   ============================================================ */
+
+.step-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* ============================================================
+   METADATA LABELS
+   ============================================================ */
+
+.meta-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--color-fw-muted);
+}
+
+/* ============================================================
+   KPI CARD ICON CONTAINERS
+   ============================================================ */
+
+.kpi-icon-blue {
+  background: var(--color-fw-mint);
+  color: var(--color-fw-dark-alt);
+}
+
+.kpi-icon-yellow {
+  background: var(--color-fw-yellow-light);
+  color: #b8941f;
+}
+
+.kpi-icon-pink {
+  background: var(--color-fw-pink-light);
+  color: #c47067;
+}
+
+/* ============================================================
+   RESULT CARD DECORATIVE CIRCLES
+   ============================================================ */
+
+.result-decoration::before,
+.result-decoration::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  pointer-events: none;
+}
+
+.result-decoration::before {
+  width: 300px;
+  height: 300px;
+  right: -80px;
+  top: -60px;
+}
+
+.result-decoration::after {
+  width: 200px;
+  height: 200px;
+  right: -40px;
+  bottom: -40px;
+}
+
+/* ============================================================
+   LOADING ANIMATION
+   ============================================================ */
+
+@keyframes pulse-dot {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1); }
+}
+
+.loading-dot {
+  animation: pulse-dot 1.4s infinite ease-in-out;
+}
+
+.loading-dot:nth-child(1) { animation-delay: 0s; }
+.loading-dot:nth-child(2) { animation-delay: 0.2s; }
+.loading-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.4s ease-out forwards;
+}
+
+@keyframes check-in {
+  from { opacity: 0; transform: scale(0.5); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-check-in {
+  animation: check-in 0.3s ease-out forwards;
+}
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-fw-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-fw-muted);
+}
+
+/* ============================================================
+   CHART BAR
+   ============================================================ */
+
+.chart-bar {
+  transition: height 0.6s ease-out;
+}
+
+/* ============================================================
+   TRANSITIONS
+   ============================================================ */
+
+.transition-expand {
+  transition: max-height 0.3s ease-out, opacity 0.3s ease-out, padding 0.3s ease-out;
+  overflow: hidden;
+}

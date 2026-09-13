@@ -11,7 +11,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 from backend.config import settings
 from backend.database.db import close_db, init_db
@@ -69,6 +69,13 @@ app.add_middleware(RequestIDMiddleware)
 app.include_router(recommendation_router)
 app.include_router(predictions_router)
 app.include_router(system_router)
+
+
+@app.get("/", response_class=FileResponse, include_in_schema=False)
+async def serve_index_html():
+    """Serve the interactive web application dashboard."""
+    return FileResponse("templates/index.html")
+
 
 
 @app.exception_handler(Exception)
