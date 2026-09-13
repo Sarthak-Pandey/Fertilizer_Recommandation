@@ -2,14 +2,19 @@ import { useState, useCallback, useRef } from 'react';
 import Sidebar from '../components/Sidebar';
 import TopHeader from '../components/TopHeader';
 import Footer from '../components/Footer';
+import OverviewPage from '../pages/OverviewPage';
+import SoilIntelligencePage from '../pages/SoilIntelligencePage';
+import FertilizerRecommendationsPage from '../pages/FertilizerRecommendationsPage';
+import PredictionHistoryPage from '../pages/PredictionHistoryPage';
+import ModelIntelligencePage from '../pages/ModelIntelligencePage';
+import SystemHealthPage from '../pages/SystemHealthPage';
 import type { NavigationItem } from '../types';
 
 interface AppShellProps {
-  children: React.ReactNode;
   onNewReading: () => void;
 }
 
-export default function AppShell({ children, onNewReading }: AppShellProps) {
+export default function AppShell({ onNewReading }: AppShellProps) {
   const [activeNav, setActiveNav] = useState<NavigationItem>('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const mainRef = useRef<HTMLDivElement>(null);
@@ -20,8 +25,32 @@ export default function AppShell({ children, onNewReading }: AppShellProps) {
     }
   }, []);
 
+  const handleNewReadingClick = useCallback(() => {
+    setActiveNav('overview');
+    onNewReading();
+  }, [onNewReading]);
+
+  const renderActivePage = () => {
+    switch (activeNav) {
+      case 'overview':
+        return <OverviewPage />;
+      case 'soil-intelligence':
+        return <SoilIntelligencePage />;
+      case 'recommendations':
+        return <FertilizerRecommendationsPage />;
+      case 'prediction-history':
+        return <PredictionHistoryPage />;
+      case 'model-audit':
+        return <ModelIntelligencePage />;
+      case 'system-health':
+        return <SystemHealthPage />;
+      default:
+        return <OverviewPage />;
+    }
+  };
+
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-[#F9F8F5] text-[#0F172A] font-sans antialiased">
       {/* Sidebar */}
       <Sidebar
         activeNav={activeNav}
@@ -30,19 +59,16 @@ export default function AppShell({ children, onNewReading }: AppShellProps) {
         onClose={() => setSidebarOpen(false)}
       />
 
-      {/* Main content area */}
-      <div className="flex-1 lg:ml-[275px] flex flex-col min-h-screen">
+      {/* Main Content Area */}
+      <div className="flex-1 lg:ml-[275px] flex flex-col min-h-screen min-w-0">
         <TopHeader
-          onNewReading={onNewReading}
+          onNewReading={handleNewReadingClick}
           onRefresh={handleRefresh}
           onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
         />
 
-        <main
-          ref={mainRef}
-          className="flex-1 overflow-y-auto grid-background"
-        >
-          {children}
+        <main ref={mainRef} className="flex-1 overflow-y-auto min-w-0">
+          {renderActivePage()}
         </main>
 
         <Footer />

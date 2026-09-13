@@ -5,25 +5,48 @@ interface KpiCardProps {
   value: string | number;
   subtitle: string;
   icon: ReactNode;
-  iconVariant: 'blue' | 'yellow' | 'pink';
+  iconVariant?: 'emerald' | 'amber' | 'blue' | 'teal';
+  trend?: string;
 }
 
-const iconBg = {
-  blue: 'bg-[#E5EFEA] text-[#163238]',
-  yellow: 'bg-[#F8EDCF] text-[#b8941f]',
-  pink: 'bg-[#F5E4E1] text-[#c47067]',
-};
+export default function KpiCard({
+  label,
+  value,
+  subtitle,
+  icon,
+  iconVariant = 'emerald',
+  trend,
+}: KpiCardProps) {
+  const variantStyles = {
+    emerald: 'bg-emerald-50 text-[#10B981] border-emerald-200',
+    amber: 'bg-amber-50 text-[#F59E0B] border-amber-200',
+    blue: 'bg-blue-50 text-blue-600 border-blue-200',
+    teal: 'bg-[#09262A] text-[#10B981] border-[#0E383C]',
+  };
 
-export default function KpiCard({ label, value, subtitle, icon, iconVariant }: KpiCardProps) {
   return (
-    <div className="bg-white rounded-2xl border border-[#DDD9CE]/60 p-5 flex items-start gap-4 hover:shadow-sm transition-shadow duration-200">
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${iconBg[iconVariant]}`}>
-        {icon}
+    <div className="bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-2xs hover:border-[#CBD5E1] transition-all duration-150 flex flex-col justify-between">
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-[0.65rem] font-mono uppercase tracking-widest text-[#64748B] font-bold">
+          {label}
+        </span>
+        <div className={`w-9 h-9 rounded-xl border flex items-center justify-center shadow-2xs ${variantStyles[iconVariant]}`}>
+          {icon}
+        </div>
       </div>
-      <div className="min-w-0">
-        <div className="meta-label mb-1">{label}</div>
-        <div className="text-2xl font-bold text-[#102D32] tracking-tight">{value}</div>
-        <div className="text-xs text-[#6E858B] mt-0.5">{subtitle}</div>
+
+      <div>
+        <div className="text-2xl font-extrabold text-[#09262A] tracking-tight mb-0.5 font-mono">
+          {value}
+        </div>
+        <div className="flex items-center justify-between text-xs text-[#64748B]">
+          <span>{subtitle}</span>
+          {trend && (
+            <span className="text-[0.65rem] font-mono text-[#10B981] font-semibold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+              {trend}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -1,95 +1,74 @@
-import { useState } from 'react';
-import { ChevronDown, CheckCircle2 } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import type { PredictionRecord } from '../types';
 
 interface PredictionRowProps {
   record: PredictionRecord;
-  index: number;
+  onInspect: (record: PredictionRecord) => void;
 }
 
-export default function PredictionRow({ record, index }: PredictionRowProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
-
+export default function PredictionRow({ record, onInspect }: PredictionRowProps) {
   return (
-    <div className="border-b border-[#DDD9CE]/50 last:border-b-0">
-      {/* Main row */}
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center gap-4 py-3.5 px-1 hover:bg-[#F7F5EF]/50 transition-colors text-left cursor-pointer"
-        aria-expanded={isExpanded}
-        aria-label={`Prediction ${record.id}, expand for details`}
-      >
-        {/* # */}
-        <div className="w-8 text-xs font-mono text-[#6E858B]">{index}</div>
+    <tr
+      onClick={() => onInspect(record)}
+      className="hover:bg-[#F9F8F5] transition-colors border-b border-[#E2E8F0] cursor-pointer text-xs group"
+    >
+      {/* Date & Time */}
+      <td className="py-3.5 px-4 font-mono font-medium text-[#09262A] whitespace-nowrap">
+        {record.date}
+        <span className="block text-[0.65rem] text-[#64748B]">{record.capturedTime}</span>
+      </td>
 
-        {/* Recommendation Output */}
-        <div className="flex-[2] min-w-0">
-          <div className="text-sm font-medium text-[#102D32]">{record.recommendation}</div>
-          <div className="text-[0.65rem] font-mono text-[#6E858B] truncate">{record.id}</div>
-        </div>
+      {/* Soil pH */}
+      <td className="py-3.5 px-4 font-mono font-semibold text-[#09262A]">
+        {record.soilPh} <span className="text-[0.65rem] text-[#64748B]">pH</span>
+      </td>
 
-        {/* Confidence */}
-        <div className="flex-1 hidden sm:flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#4D947A]" />
-          <span className="text-sm text-[#102D32]">{record.confidence}%</span>
-        </div>
+      {/* NPK Values */}
+      <td className="py-3.5 px-4 font-mono text-[#09262A] whitespace-nowrap">
+        <span className="text-emerald-700 font-bold">{record.nitrogen}</span> /{' '}
+        <span className="text-amber-700 font-bold">{record.phosphorus}</span> /{' '}
+        <span className="text-blue-700 font-bold">{record.potassium}</span>
+        <span className="block text-[0.65rem] text-[#64748B]">N / P / K (mg/kg)</span>
+      </td>
 
-        {/* Date Status */}
-        <div className="flex-1 hidden sm:block">
-          <div className="text-xs text-[#102D32]">{record.date}</div>
-          <div className="text-[0.6rem] text-[#4D947A]">{record.status}</div>
-        </div>
+      {/* Crop Growth Stage */}
+      <td className="py-3.5 px-4">
+        <span className="px-2.5 py-1 rounded-full text-[0.68rem] font-medium bg-[#F1F5F9] text-[#0F172A] border border-[#E2E8F0]">
+          {record.growthStage}
+        </span>
+      </td>
 
-        {/* Latency */}
-        <div className="flex-1 hidden md:block">
-          <span className="text-xs font-mono text-[#6E858B]">42ms</span>
-        </div>
+      {/* Recommendation Output */}
+      <td className="py-3.5 px-4 font-bold text-[#09262A]">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200">
+          {record.recommendation}
+        </span>
+      </td>
 
-        {/* Timestamp */}
-        <div className="flex-1 text-xs text-[#6E858B] font-mono hidden md:block">
-          {record.capturedTime}
-        </div>
+      {/* Confidence */}
+      <td className="py-3.5 px-4 font-mono font-bold text-[#F59E0B]">
+        {record.confidence}%
+      </td>
 
-        {/* Audit */}
-        <div className="w-14 hidden lg:flex items-center justify-center">
-          <CheckCircle2 className="w-4 h-4 text-[#4D947A]" />
-        </div>
+      {/* Latency */}
+      <td className="py-3.5 px-4 font-mono text-[#64748B]">
+        {record.latencyMs ? `${record.latencyMs} ms` : '—'}
+      </td>
 
-        {/* Chevron */}
-        <ChevronDown
-          className={`w-4 h-4 text-[#6E858B] shrink-0 transition-transform duration-200 ${
-            isExpanded ? 'rotate-180' : ''
-          }`}
-        />
-      </button>
-
-      {/* Expanded details */}
-      <div
-        className={`transition-expand ${
-          isExpanded ? 'max-h-96 opacity-100 pb-4' : 'max-h-0 opacity-0'
-        }`}
-      >
-        <div className="bg-[#F7F5EF] rounded-xl p-4 mx-1 grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {[
-            { label: 'Soil pH', value: record.soilPh.toString() },
-            { label: 'Nitrogen', value: `${record.nitrogen} mg/kg` },
-            { label: 'Phosphorus', value: `${record.phosphorus} mg/kg` },
-            { label: 'Potassium', value: `${record.potassium} mg/kg` },
-            { label: 'Growth stage', value: record.growthStage },
-            { label: 'Recommendation', value: record.recommendation },
-            { label: 'Confidence', value: `${record.confidence}%` },
-            { label: 'Model version', value: record.modelVersion },
-            { label: 'Audit status', value: record.auditStatus },
-          ].map((item) => (
-            <div key={item.label}>
-              <div className="text-[0.6rem] font-mono uppercase tracking-[0.12em] text-[#6E858B] mb-0.5">
-                {item.label}
-              </div>
-              <div className="text-xs font-medium text-[#102D32]">{item.value}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
+      {/* Actions */}
+      <td className="py-3.5 px-4 text-right">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onInspect(record);
+          }}
+          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#F9F8F5] hover:bg-[#09262A] hover:text-white text-[#09262A] font-mono text-[0.65rem] font-bold border border-[#E2E8F0] transition-colors cursor-pointer"
+        >
+          <Eye className="w-3 h-3" />
+          <span>INSPECT</span>
+        </button>
+      </td>
+    </tr>
   );
 }

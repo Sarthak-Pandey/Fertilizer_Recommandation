@@ -1,70 +1,108 @@
-import { Server, Activity, Cpu, Clock } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Activity, Server, Cpu, Database, RefreshCw, CheckCircle2, AlertTriangle, XCircle } from 'lucide-react';
+import { fetchHealthStatus } from '../services/recommendationService';
+import type { HealthStatus } from '../services/recommendationService';
 
 export default function SystemHealthBar() {
+  const [health, setHealth] = useState<HealthStatus>({
+    backend: 'healthy',
+    mlService: 'healthy',
+    modelVersion: 'model-v1',
+  });
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const loadHealth = async () => {
+    setIsRefreshing(true);
+    try {
+      const status = await fetchHealthStatus();
+      setHealth(status);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    loadHealth();
+    const timer = setInterval(loadHealth, 30_000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const getStatusBadge = (status: 'healthy' | 'degraded' | 'offline') => {
+    if (status === 'healthy') {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[0.68rem] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+          <CheckCircle2 className="w-3 h-3 text-[#10B981]" />
+          ● Operational
+        </span>
+      );
+    }
+    if (status === 'degraded') {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[0.68rem] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200">
+          <AlertTriangle className="w-3 h-3 text-[#F59E0B]" />
+          ● Degraded
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[0.68rem] font-mono font-bold bg-rose-50 text-rose-800 border border-rose-200">
+        <XCircle className="w-3 h-3 text-rose-600" />
+        ● Offline (Mock Active)
+      </span>
+    );
+  };
+
   return (
-    <div className="bg-white rounded-2xl border border-[#DDD9CE]/60 p-5">
-      {/* Header row */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[#E5EFEA] flex items-center justify-center">
-            <Server className="w-4 h-4 text-[#102D32]" />
-          </div>
-          <div>
-            <h4 className="text-sm font-bold text-[#102D32]">System Service Health & Pipeline Metrics</h4>
-            <div className="text-[0.6rem] font-mono text-[#6E858B]">
-              Endpoint: <span className="text-[#4D947A]">GET /api/v1/health</span>
-            </div>
-          </div>
+    <div className="bg-white rounded-2xl border border-[#E2E8F0] p-6 shadow-2xs">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Activity className="w-4 h-4 text-[#10B981]" />
+          <h3 className="text-base font-extrabold text-[#09262A]">System Infrastructure Telemetry</h3>
         </div>
+
+        <button
+          type="button"
+          onClick={loadHealth}
+          disabled={isRefreshing}
+          className="flex items-center gap-1.5 text-[0.68rem] font-mono px-3 py-1 rounded-full border border-[#E2E8F0] bg-[#F9F8F5] text-[#64748B] font-bold hover:bg-[#E2E8F0] transition-colors cursor-pointer"
+        >
+          <RefreshCw className={`w-3 h-3 ${isRefreshing ? 'animate-spin' : ''}`} />
+          <span>Ping Health</span>
+        </button>
       </div>
 
-      {/* Status row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {/* Backend Server */}
-        <div className="flex items-center gap-2.5">
-          <div className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-[#4D947A]" />
-            <Activity className="w-3.5 h-3.5 text-[#4D947A]" />
-          </div>
-          <div>
-            <div className="text-xs font-medium text-[#102D32]">Backend Server</div>
-            <div className="flex items-center gap-1">
-              <span className="w-1 h-1 rounded-full bg-[#4D947A]" />
-              <span className="text-[0.6rem] text-[#4D947A] font-medium">healthy</span>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="bg-[#F9F8F5] p-4 rounded-xl border border-[#E2E8F0] flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Server className="w-5 h-5 text-[#09262A]" />
+            <div>
+              <span className="text-xs font-bold text-[#09262A] block">FastAPI Gateway</span>
+              <span className="text-[0.65rem] font-mono text-[#64748B]">Port :8000</span>
             </div>
           </div>
+          {getStatusBadge(health.backend)}
         </div>
 
-        {/* ML Prediction */}
-        <div className="flex items-center gap-2.5">
-          <div className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-[#4D947A]" />
-            <Cpu className="w-3.5 h-3.5 text-[#4D947A]" />
-          </div>
-          <div>
-            <div className="text-xs font-medium text-[#102D32]">ML Prediction</div>
-            <div className="flex items-center gap-1">
-              <span className="w-1 h-1 rounded-full bg-[#4D947A]" />
-              <span className="text-[0.6rem] text-[#4D947A] font-medium">healthy</span>
+        <div className="bg-[#F9F8F5] p-4 rounded-xl border border-[#E2E8F0] flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Cpu className="w-5 h-5 text-[#10B981]" />
+            <div>
+              <span className="text-xs font-bold text-[#09262A] block">ML Inference Engine</span>
+              <span className="text-[0.65rem] font-mono text-[#64748B]">{health.modelVersion} (:8001)</span>
             </div>
           </div>
+          {getStatusBadge(health.mlService)}
         </div>
 
-        {/* Active Model */}
-        <div>
-          <div className="text-[0.6rem] font-mono uppercase tracking-[0.1em] text-[#6E858B] mb-0.5">Active Model</div>
-          <div className="text-xs font-mono font-semibold text-[#102D32]">model-v1</div>
-        </div>
-
-        {/* Last Check */}
-        <div className="flex items-center gap-2">
-          <Clock className="w-3.5 h-3.5 text-[#6E858B]" />
-          <div>
-            <div className="text-[0.6rem] font-mono uppercase tracking-[0.1em] text-[#6E858B] mb-0.5">Last Check</div>
-            <div className="text-xs font-mono font-semibold text-[#102D32]">
-              {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
+        <div className="bg-[#F9F8F5] p-4 rounded-xl border border-[#E2E8F0] flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Database className="w-5 h-5 text-[#3B82F6]" />
+            <div>
+              <span className="text-xs font-bold text-[#09262A] block">SQLite Database</span>
+              <span className="text-[0.65rem] font-mono text-[#64748B]">predictions.db</span>
             </div>
           </div>
+          {getStatusBadge(health.backend === 'healthy' ? 'healthy' : 'offline')}
         </div>
       </div>
     </div>

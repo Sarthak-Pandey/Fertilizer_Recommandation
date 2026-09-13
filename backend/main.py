@@ -50,7 +50,10 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Environment-restricted CORS policy
+# API Key authentication middleware
+app.add_middleware(APIKeyAuthMiddleware)
+
+# Environment-restricted CORS policy (must be outer to auth middleware so preflights pass)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOWED_ORIGINS,
@@ -58,9 +61,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# API Key authentication middleware
-app.add_middleware(APIKeyAuthMiddleware)
 
 # Register Request ID correlation middleware (outermost for incoming requests)
 app.add_middleware(RequestIDMiddleware)

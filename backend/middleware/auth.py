@@ -36,6 +36,10 @@ class APIKeyAuthMiddleware(BaseHTTPMiddleware):
     """
 
     async def dispatch(self, request: Request, call_next) -> Response:
+        # HTTP OPTIONS preflight requests must bypass API key auth for CORS
+        if request.method == "OPTIONS":
+            return await call_next(request)
+
         path = request.url.path.rstrip("/")
         if path in PUBLIC_PATHS or path.startswith("/docs") or path.startswith("/openapi"):
             return await call_next(request)

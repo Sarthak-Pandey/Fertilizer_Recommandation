@@ -1,9 +1,23 @@
 /* ============================================================
-   Fieldwise — Mock Data
+   Fieldwise — Mock / Default Data
+   ============================================================
+   
+   Mock-fallback rule
+   ──────────────────
+   These datasets are used ONLY when the backend is unreachable
+   (connectivity failure — network error, timeout, DNS).
+   
+   A real HTTP error (401, 422, 500) must surface as a visible
+   error in the UI, NOT silently swap to this data. The decision
+   is enforced in recommendationService.ts via isConnectivityFailure().
    ============================================================ */
 
 import type { PredictionRecord, KpiData, ServiceStatus, DailyVolume } from '../types';
 
+/**
+ * Fallback prediction records displayed when the backend is offline.
+ * Growth stages use the backend-aligned enum values.
+ */
 export const mockPredictionHistory: PredictionRecord[] = [
   {
     id: 'e36c9ac9-0668-',
@@ -32,7 +46,7 @@ export const mockPredictionHistory: PredictionRecord[] = [
     nitrogen: 55,
     phosphorus: 12,
     potassium: 40,
-    growthStage: 'Reproductive',
+    growthStage: 'Flowering',
     modelVersion: 'model-v1',
     auditStatus: 'Verified',
     fullTimestamp: '2026-09-12T19:03:00Z',
@@ -48,7 +62,7 @@ export const mockPredictionHistory: PredictionRecord[] = [
     nitrogen: 60,
     phosphorus: 45,
     potassium: 15,
-    growthStage: 'Maturity',
+    growthStage: 'Harvest',
     modelVersion: 'model-v1',
     auditStatus: 'Verified',
     fullTimestamp: '2026-09-12T18:51:00Z',

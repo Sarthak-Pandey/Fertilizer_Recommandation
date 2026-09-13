@@ -1,93 +1,184 @@
-import { useState } from 'react';
-import { ChevronLeft, ChevronRight, RefreshCw, ClipboardList } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { History, Search, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
 import PredictionRow from './PredictionRow';
+import PredictionDetailModal from './PredictionDetailModal';
 import type { PredictionRecord } from '../types';
 
 interface PredictionHistoryProps {
   records: PredictionRecord[];
-  totalCount: number;
+  totalCount?: number;
+  onRefresh?: () => void;
 }
 
-const ITEMS_PER_PAGE = 10;
+export default function PredictionHistory({
+  records,
+  totalCount,
+  onRefresh,
+}: PredictionHistoryProps) {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [stageFilter, setStageFilter] = useState<string>('ALL');
+  const [fertilizerFilter, setFertilizerFilter] = useState<string>('ALL');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedRecord, setSelectedRecord] = useState<PredictionRecord | null>(null);
 
-export default function PredictionHistory({ records, totalCount }: PredictionHistoryProps) {
-  const [page, setPage] = useState(1);
-  const totalPages = Math.max(1, Math.ceil(records.length / ITEMS_PER_PAGE));
-  const displayTotalPages = Math.max(1, Math.ceil(totalCount / ITEMS_PER_PAGE));
-  const startIdx = (page - 1) * ITEMS_PER_PAGE;
-  const pageRecords = records.slice(startIdx, startIdx + ITEMS_PER_PAGE);
+  const pageSize = 8;
+
+  const filteredRecords = useMemo(() => {
+    return records.filter((r) => {
+      const matchesSearch =
+        r.recommendation.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        r.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        r.growthStage.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesStage = stageFilter === 'ALL' || r.growthStage === stageFilter;
+      const matchesFertilizer = fertilizerFilter === 'ALL' || r.recommendation === fertilizerFilter;
+
+      return matchesSearch && matchesStage && matchesFertilizer;
+    });
+  }, [records, searchTerm, stageFilter, fertilizerFilter]);
+
+  const totalPages = Math.ceil(filteredRecords.length / pageSize) || 1;
+  const paginatedRecords = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredRecords.slice(start, start + pageSize);
+  }, [filteredRecords, currentPage, pageSize]);
 
   return (
-    <div className="bg-white rounded-2xl border border-[#DDD9CE]/60 p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-1">
-        <span className="step-label text-[#4D947A]">Audit Trail</span>
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-[#6E858B]">Total: <span className="font-semibold text-[#102D32]">{totalCount}</span></span>
-          <button className="flex items-center gap-1.5 text-xs text-[#6E858B] hover:text-[#102D32] transition-colors cursor-pointer">
-            <RefreshCw className="w-3 h-3" />
-            Refresh
-          </button>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-2 mb-5">
-        <ClipboardList className="w-5 h-5 text-[#102D32]" />
-        <h3 className="text-lg font-bold text-[#102D32]">Recent recommendations</h3>
-      </div>
-
-      {/* Column headers */}
-      <div className="flex items-center gap-4 pb-3 border-b border-[#DDD9CE]/50 px-1">
-        <div className="w-8 meta-label">#</div>
-        <div className="flex-[2] meta-label">Recommendation Output</div>
-        <div className="flex-1 meta-label hidden sm:block">Confidence</div>
-        <div className="flex-1 meta-label hidden sm:block">Date Status</div>
-        <div className="flex-1 meta-label hidden md:block">Latency</div>
-        <div className="flex-1 meta-label hidden md:block">Timestamp</div>
-        <div className="w-14 meta-label hidden lg:block">Audit</div>
-        <div className="w-6" />
-      </div>
-
-      {/* Rows */}
-      <div>
-        {pageRecords.length > 0 ? (
-          pageRecords.map((record, index) => (
-            <PredictionRow key={record.id} record={record} index={startIdx + index + 1} />
-          ))
-        ) : (
-          <div className="py-8 text-center text-sm text-[#6E858B]">
-            No prediction records to display.
+    <div className="bg-white rounded-2xl border border-[#E2E8F0] p-6 shadow-2xs">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <History className="w-4 h-4 text-[#10B981]" />
+            <h3 className="text-lg font-extrabold text-[#09262A] tracking-tight">Prediction Telemetry History</h3>
           </div>
+          <p className="text-xs text-[#64748B]">
+            Logged inference audit trail across soil probe analyses. Total entries: {totalCount ?? records.length}
+          </p>
+        </div>
+
+        {onRefresh && (
+          <button
+            type="button"
+            onClick={onRefresh}
+            className="self-start md:self-auto flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#E2E8F0] bg-[#F9F8F5] text-[#09262A] text-xs font-semibold hover:bg-[#E2E8F0] transition-colors cursor-pointer"
+          >
+            <RefreshCw className="w-3.5 h-3.5 text-[#64748B]" />
+            <span>Sync History</span>
+          </button>
         )}
       </div>
 
-      {/* Pagination */}
-      <div className="flex items-center justify-between mt-4 pt-3 border-t border-[#DDD9CE]/30">
-        <span className="text-xs text-[#6E858B]">
-          Page {page} of {displayTotalPages}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+        <div className="relative">
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]" />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
+            placeholder="Search by ID, recommendation..."
+            className="w-full pl-9 pr-3 py-2 rounded-xl border border-[#CBD5E1] text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#10B981]/30 focus:border-[#10B981]"
+          />
+        </div>
+
+        <div className="relative">
+          <select
+            value={stageFilter}
+            onChange={(e) => {
+              setStageFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="w-full px-3 py-2 rounded-xl border border-[#CBD5E1] text-xs font-medium bg-white focus:outline-none focus:ring-2 focus:ring-[#10B981]/30 focus:border-[#10B981]"
+          >
+            <option value="ALL">All Growth Stages</option>
+            <option value="Sowing">Sowing</option>
+            <option value="Vegetative">Vegetative</option>
+            <option value="Flowering">Flowering</option>
+            <option value="Harvest">Harvest</option>
+          </select>
+        </div>
+
+        <div className="relative">
+          <select
+            value={fertilizerFilter}
+            onChange={(e) => {
+              setFertilizerFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="w-full px-3 py-2 rounded-xl border border-[#CBD5E1] text-xs font-medium bg-white focus:outline-none focus:ring-2 focus:ring-[#10B981]/30 focus:border-[#10B981]"
+          >
+            <option value="ALL">All Fertilizer Outputs</option>
+            <option value="Urea">Urea</option>
+            <option value="DAP">DAP</option>
+            <option value="MOP">MOP</option>
+            <option value="14-35-14">14-35-14</option>
+            <option value="28-28-0">28-28-0</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="overflow-x-auto rounded-xl border border-[#E2E8F0]">
+        <table className="w-full text-left border-collapse min-w-[700px]">
+          <thead>
+            <tr className="bg-[#F9F8F5] border-b border-[#E2E8F0] text-[0.65rem] font-mono uppercase text-[#64748B] tracking-wider">
+              <th className="py-3 px-4 font-bold">Timestamp</th>
+              <th className="py-3 px-4 font-bold">Soil pH</th>
+              <th className="py-3 px-4 font-bold">N / P / K</th>
+              <th className="py-3 px-4 font-bold">Growth Stage</th>
+              <th className="py-3 px-4 font-bold">AI Output</th>
+              <th className="py-3 px-4 font-bold">Confidence</th>
+              <th className="py-3 px-4 font-bold">Latency</th>
+              <th className="py-3 px-4 font-bold text-right">Audit</th>
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedRecords.length > 0 ? (
+              paginatedRecords.map((rec) => (
+                <PredictionRow key={rec.id} record={rec} onInspect={(r) => setSelectedRecord(r)} />
+              ))
+            ) : (
+              <tr>
+                <td colSpan={8} className="py-8 text-center text-xs text-[#64748B]">
+                  No prediction records match the selected filter parameters.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="flex items-center justify-between pt-4 mt-2 text-xs text-[#64748B]">
+        <span>
+          Showing {paginatedRecords.length > 0 ? (currentPage - 1) * pageSize + 1 : 0} to{' '}
+          {Math.min(currentPage * pageSize, filteredRecords.length)} of {filteredRecords.length} entries
         </span>
+
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setPage(Math.max(1, page - 1))}
-            disabled={page === 1}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#DDD9CE] hover:bg-[#F7F5EF] disabled:opacity-30 text-xs text-[#6E858B] transition-colors cursor-pointer disabled:cursor-not-allowed"
-            aria-label="Previous page"
+            type="button"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            className="p-1.5 rounded-lg border border-[#E2E8F0] hover:bg-[#F9F8F5] disabled:opacity-40 cursor-pointer"
           >
-            <ChevronLeft className="w-3 h-3" />
-            Previous
+            <ChevronLeft className="w-4 h-4" />
           </button>
-          <span className="text-xs text-[#6E858B] font-mono">{page} / {displayTotalPages}</span>
+          <span className="font-mono text-xs font-bold text-[#09262A]">
+            Page {currentPage} of {totalPages}
+          </span>
           <button
-            onClick={() => setPage(Math.min(totalPages, page + 1))}
-            disabled={page === totalPages}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#DDD9CE] hover:bg-[#F7F5EF] disabled:opacity-30 text-xs text-[#6E858B] transition-colors cursor-pointer disabled:cursor-not-allowed"
-            aria-label="Next page"
+            type="button"
+            disabled={currentPage >= totalPages}
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            className="p-1.5 rounded-lg border border-[#E2E8F0] hover:bg-[#F9F8F5] disabled:opacity-40 cursor-pointer"
           >
-            Next
-            <ChevronRight className="w-3 h-3" />
+            <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       </div>
+
+      <PredictionDetailModal record={selectedRecord} onClose={() => setSelectedRecord(null)} />
     </div>
   );
 }
