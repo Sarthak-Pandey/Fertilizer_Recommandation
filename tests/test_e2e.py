@@ -67,7 +67,8 @@ class TestE2EIntegration:
         assert data["model_version"] == "model-v1"
 
     def test_backend_recommend(self):
-        r = httpx.post(f"{BACKEND_URL}/api/v1/fertilizer/recommend", json=VALID_REQUEST)
+        headers = {"X-API-Key": "dev-secret-key-123"}
+        r = httpx.post(f"{BACKEND_URL}/api/v1/fertilizer/recommend", json=VALID_REQUEST, headers=headers)
         assert r.status_code == 200
         data = r.json()
         assert data["success"] is True

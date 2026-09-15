@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { api } from '../services/api'
@@ -98,6 +99,7 @@ function ConfidenceRing({ value }: { value: number }) {
 
 // ---- Main Page ----
 export default function OverviewPage() {
+  const navigate = useNavigate()
   const heroRef = useRef<HTMLDivElement>(null)
   const statsRef = useRef<HTMLDivElement>(null)
   const formRef = useRef<HTMLDivElement>(null)
@@ -114,6 +116,8 @@ export default function OverviewPage() {
   const [computing, setComputing] = useState(false)
   const [filter, setFilter] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
+  const [logPage, setLogPage] = useState(1)
+  const [logTotalPages, setLogTotalPages] = useState(1)
 
   // Integration States
   const [recommendationResult, setRecommendationResult] = useState<RecommendResponse | null>(null)
@@ -122,11 +126,11 @@ export default function OverviewPage() {
   const [healthData, setHealthData] = useState<HealthResponse | null>(null)
   const [apiError, setApiError] = useState<string | null>(null)
 
-  const loadBackendData = async () => {
+  const loadBackendData = async (page = logPage) => {
     try {
       const [statsRes, logsRes, healthRes] = await Promise.allSettled([
         api.getPredictionStats(),
-        api.getPredictions(1, 10),
+        api.getPredictions(page, 10),
         api.getSystemHealth(),
       ])
 
@@ -135,6 +139,7 @@ export default function OverviewPage() {
       }
       if (logsRes.status === 'fulfilled') {
         setLogsData(logsRes.value.items)
+        setLogTotalPages(logsRes.value.total_pages || 1)
       }
       if (healthRes.status === 'fulfilled') {
         setHealthData(healthRes.value)
@@ -145,8 +150,10 @@ export default function OverviewPage() {
   }
 
   useEffect(() => {
-    loadBackendData()
+    loadBackendData(logPage)
+  }, [logPage])
 
+  useEffect(() => {
     const ctx = gsap.context(() => {
       // Hero stagger entrance
       gsap.fromTo(
@@ -410,6 +417,52 @@ export default function OverviewPage() {
                 }}>NODE #US-C1-S8</span>
               </div>
 
+              {/* Quick Preset Buttons for Testing All Fertilizers */}
+              <div style={{ marginBottom: '1.25rem' }}>
+                <span style={{
+                  fontFamily: 'var(--font-body)', fontSize: '0.6875rem', fontWeight: 600,
+                  color: '#666666', textTransform: 'uppercase', letterSpacing: '0.04em',
+                  display: 'block', marginBottom: '0.5rem',
+                }}>Quick Soil Test Presets</span>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem' }}>
+                  {[
+                    { label: 'Low N (Urea)', ph: 6.5, n: 35, p: 60, k: 60, stage: 'Vegetative V4' },
+                    { label: 'Low P (DAP)', ph: 6.5, n: 100, p: 20, k: 70, stage: 'Sowing' },
+                    { label: 'Low K (MOP)', ph: 6.5, n: 100, p: 65, k: 20, stage: 'Grain Fill' },
+                    { label: 'Alkaline (Zinc)', ph: 8.1, n: 100, p: 65, k: 70, stage: 'Sowing' },
+                    { label: 'Acidic (Compost)', ph: 5.1, n: 100, p: 65, k: 70, stage: 'Grain Fill' },
+                  ].map(preset => (
+                    <button
+                      key={preset.label}
+                      type="button"
+                      onClick={() => {
+                        setPh(preset.ph)
+                        setNitrogen(preset.n)
+                        setPhosphorus(preset.p)
+                        setPotassium(preset.k)
+                        setStage(preset.stage)
+                      }}
+                      style={{
+                        padding: '0.3rem 0.625rem',
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid #E2E2DF',
+                        background: '#FAFAF8',
+                        color: '#111111',
+                        fontFamily: 'var(--font-body)',
+                        fontSize: '0.6875rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease',
+                      }}
+                      onMouseEnter={e => (e.currentTarget.style.background = '#EAEAE6')}
+                      onMouseLeave={e => (e.currentTarget.style.background = '#FAFAF8')}
+                    >
+                      ⚡ {preset.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {apiError && (
                 <div style={{
                   padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)',
@@ -663,7 +716,7 @@ export default function OverviewPage() {
                     <span className="pulse-dot" />
                     VALIDATED & READY
                   </div>
-                  <button className="btn-secondary" style={{ padding: '0.3rem 0.75rem', fontSize: '0.6875rem' }}>
+                  <button className="btn-secondary" style={{ padding: '0.3rem 0.75rem', fontSize: '0.6875rem' }} onClick={() => navigate('/audit')}>
                     Telemetry Audit
                     <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>chevron_right</span>
                   </button>
@@ -780,7 +833,7 @@ export default function OverviewPage() {
                     <span className="pulse-dot" />
                     {rec.status}
                   </span>
-                  <button className="btn-secondary" style={{ padding: '0.3rem 0.875rem', fontSize: '0.75rem' }}>
+                  <button className="btn-secondary" style={{ padding: '0.3rem 0.875rem', fontSize: '0.75rem' }} onClick={() => navigate('/history')}>
                     Inspect
                   </button>
                 </div>
@@ -794,10 +847,24 @@ export default function OverviewPage() {
             borderTop: '1px solid #E2E2DF',
             fontFamily: 'var(--font-body)', fontSize: '0.75rem', color: '#666666',
           }}>
-            <span>Page 1 of {statsData?.total_count ? Math.ceil(statsData.total_count / 10) : 1}</span>
+            <span>Page {logPage} of {logTotalPages}</span>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button className="btn-secondary" style={{ padding: '0.3rem 0.875rem', fontSize: '0.75rem' }}>Previous</button>
-              <button className="btn-secondary" style={{ padding: '0.3rem 0.875rem', fontSize: '0.75rem' }}>Next</button>
+              <button
+                className="btn-secondary"
+                style={{ padding: '0.3rem 0.875rem', fontSize: '0.75rem', opacity: logPage <= 1 ? 0.5 : 1 }}
+                disabled={logPage <= 1}
+                onClick={() => setLogPage(p => Math.max(1, p - 1))}
+              >
+                Previous
+              </button>
+              <button
+                className="btn-secondary"
+                style={{ padding: '0.3rem 0.875rem', fontSize: '0.75rem', opacity: logPage >= logTotalPages ? 0.5 : 1 }}
+                disabled={logPage >= logTotalPages}
+                onClick={() => setLogPage(p => Math.min(logTotalPages, p + 1))}
+              >
+                Next
+              </button>
             </div>
           </div>
         </section>

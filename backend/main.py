@@ -18,6 +18,7 @@ from backend.database.db import close_db, init_db
 from backend.logging_config import setup_logging
 from backend.middleware.auth import APIKeyAuthMiddleware
 from backend.middleware.request_id import RequestIDMiddleware, get_request_id
+from backend.routers.auth import router as auth_router
 from backend.routers.predictions import router as predictions_router
 from backend.routers.recommendation import ml_client
 from backend.routers.recommendation import router as recommendation_router
@@ -66,15 +67,27 @@ app.add_middleware(
 app.add_middleware(RequestIDMiddleware)
 
 # Register API Routers
+app.include_router(auth_router)
 app.include_router(recommendation_router)
 app.include_router(predictions_router)
 app.include_router(system_router)
 
 
-@app.get("/", response_class=FileResponse, include_in_schema=False)
+@app.get("/", include_in_schema=False)
 async def serve_index_html():
-    """Serve the interactive web application dashboard."""
-    return FileResponse("templates/index.html")
+    """Serve the API Gateway index or health info."""
+    import os
+    if os.path.exists("templates/index.html"):
+        return FileResponse("templates/index.html")
+    return JSONResponse(
+        content={
+            "status": "online",
+            "service": "Fertilizer Recommendation Backend Gateway",
+            "version": "1.0.0",
+            "docs_url": "/docs",
+            "health_url": "/api/v1/health",
+        }
+    )
 
 
 

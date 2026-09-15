@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import MobileNav from './components/MobileNav'
 import OverviewPage from './pages/OverviewPage'
@@ -11,10 +11,16 @@ export default function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={<OverviewPage />} />
+        <Route path="/overview" element={<OverviewPage />} />
         <Route path="/history" element={<PredictionHistoryPage />} />
         <Route path="/audit" element={<ModelAuditPage />} />
+        <Route path="*" element={<Navigate to="/overview" replace />} />
       </Routes>
       <MobileNav />
     </BrowserRouter>
   )
 }
+
+
+
+
