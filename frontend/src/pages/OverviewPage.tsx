@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { api } from '../services/api'
+import type { RecommendResponse, PredictionDetail, PredictionStatsResponse, HealthResponse } from '../services/api'
 
 gsap.registerPlugin(ScrollTrigger)
 
 // ---- Data ----
-const recommendations = [
+const recommendationsFallback = [
   { id: '#FW-9402', formula: 'Urea 46-0-0', conf: 99.1, time: 'Today 09:42', latency: '28ms', status: 'Deployed', statusColor: 'primary' },
   { id: '#FW-9401', formula: 'DAP (18-46-0)', conf: 97.8, time: 'Today 08:15', latency: '32ms', status: 'Deployed', statusColor: 'primary' },
   { id: '#FW-9399', formula: 'Potash MOP', conf: 98.4, time: 'Yesterday', latency: '24ms', status: 'In Review', statusColor: 'amber' },
@@ -13,14 +15,17 @@ const recommendations = [
   { id: '#FW-9390', formula: 'NPK 16-16-16', conf: 95.2, time: '2 days ago', latency: '29ms', status: 'Deployed', statusColor: 'primary' },
 ]
 
-const healthMetrics = [
-  { icon: 'speed', label: 'FastAPI Latency', value: '28ms avg' },
-  { icon: 'memory', label: 'Redis Cache Hit', value: '99.4%' },
-  { icon: 'hub', label: 'XGBoost Node', value: 'Healthy ✓' },
-  { icon: 'verified_user', label: 'System Uptime', value: '99.98%' },
-]
-
 const growthStages = ['Sowing', 'Vegetative V4', 'Reproductive R1', 'Grain Fill']
+
+const mapStageToBackend = (uiStage: string): string => {
+  switch (uiStage) {
+    case 'Sowing': return 'Sowing'
+    case 'Vegetative V4': return 'Vegetative'
+    case 'Reproductive R1': return 'Flowering'
+    case 'Grain Fill': return 'Harvest'
+    default: return 'Vegetative'
+  }
+}
 
 // ---- Animated Counter ----
 function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: string }) {
@@ -108,8 +113,40 @@ export default function OverviewPage() {
   const [stage, setStage] = useState('Vegetative V4')
   const [computing, setComputing] = useState(false)
   const [filter, setFilter] = useState('all')
+  const [searchQuery, setSearchQuery] = useState('')
+
+  // Integration States
+  const [recommendationResult, setRecommendationResult] = useState<RecommendResponse | null>(null)
+  const [statsData, setStatsData] = useState<PredictionStatsResponse | null>(null)
+  const [logsData, setLogsData] = useState<PredictionDetail[]>([])
+  const [healthData, setHealthData] = useState<HealthResponse | null>(null)
+  const [apiError, setApiError] = useState<string | null>(null)
+
+  const loadBackendData = async () => {
+    try {
+      const [statsRes, logsRes, healthRes] = await Promise.allSettled([
+        api.getPredictionStats(),
+        api.getPredictions(1, 10),
+        api.getSystemHealth(),
+      ])
+
+      if (statsRes.status === 'fulfilled') {
+        setStatsData(statsRes.value)
+      }
+      if (logsRes.status === 'fulfilled') {
+        setLogsData(logsRes.value.items)
+      }
+      if (healthRes.status === 'fulfilled') {
+        setHealthData(healthRes.value)
+      }
+    } catch {
+      // Ignore initial load errors gracefully
+    }
+  }
 
   useEffect(() => {
+    loadBackendData()
+
     const ctx = gsap.context(() => {
       // Hero stagger entrance
       gsap.fromTo(
@@ -119,53 +156,123 @@ export default function OverviewPage() {
       )
 
       // Stats cards
-      gsap.fromTo(
-        statsRef.current!.children,
-        { opacity: 0, y: 20, scale: 0.97 },
-        {
-          opacity: 1, y: 0, scale: 1,
-          duration: 0.6, stagger: 0.1, ease: 'power2.out',
-          delay: 0.4,
-        }
-      )
+      if (statsRef.current) {
+        gsap.fromTo(
+          statsRef.current.children,
+          { opacity: 0, y: 20, scale: 0.97 },
+          {
+            opacity: 1, y: 0, scale: 1,
+            duration: 0.6, stagger: 0.1, ease: 'power2.out',
+            delay: 0.4,
+          }
+        )
+      }
 
       // Form panel – scroll trigger
-      gsap.fromTo(formRef.current, { opacity: 0, x: -30 }, {
-        opacity: 1, x: 0, duration: 0.8, ease: 'power3.out',
-        scrollTrigger: { trigger: formRef.current, start: 'top 85%' },
-      })
+      if (formRef.current) {
+        gsap.fromTo(formRef.current, { opacity: 0, x: -30 }, {
+          opacity: 1, x: 0, duration: 0.8, ease: 'power3.out',
+          scrollTrigger: { trigger: formRef.current, start: 'top 85%' },
+        })
+      }
 
       // Result panel – scroll trigger
-      gsap.fromTo(resultRef.current, { opacity: 0, x: 30 }, {
-        opacity: 1, x: 0, duration: 0.8, ease: 'power3.out',
-        scrollTrigger: { trigger: resultRef.current, start: 'top 85%' },
-      })
+      if (resultRef.current) {
+        gsap.fromTo(resultRef.current, { opacity: 0, x: 30 }, {
+          opacity: 1, x: 0, duration: 0.8, ease: 'power3.out',
+          scrollTrigger: { trigger: resultRef.current, start: 'top 85%' },
+        })
+      }
 
       // Table rows stagger
-      gsap.fromTo(rowsRef.current, { opacity: 0, y: 15 }, {
-        opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: 'power2.out',
-        scrollTrigger: { trigger: tableRef.current, start: 'top 80%' },
-      })
+      if (rowsRef.current.length > 0) {
+        gsap.fromTo(rowsRef.current, { opacity: 0, y: 15 }, {
+          opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: 'power2.out',
+          scrollTrigger: { trigger: tableRef.current, start: 'top 80%' },
+        })
+      }
 
       // Health bar
-      gsap.fromTo(healthRef.current!.children, { opacity: 0, y: 15 }, {
-        opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: 'power2.out',
-        scrollTrigger: { trigger: healthRef.current, start: 'top 90%' },
-      })
+      if (healthRef.current) {
+        gsap.fromTo(healthRef.current.children, { opacity: 0, y: 15 }, {
+          opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: 'power2.out',
+          scrollTrigger: { trigger: healthRef.current, start: 'top 90%' },
+        })
+      }
     })
 
     return () => ctx.revert()
   }, [])
 
-  const handleCompute = () => {
+  const handleCompute = async () => {
     setComputing(true)
+    setApiError(null)
     gsap.to('.compute-btn', { scale: 0.98, duration: 0.1, yoyo: true, repeat: 1 })
-    setTimeout(() => setComputing(false), 1800)
+
+    try {
+      const result = await api.recommendFertilizer({
+        Soil_pH: ph,
+        Nitrogen_Level: nitrogen,
+        Phosphorus_Level: phosphorus,
+        Potassium_Level: potassium,
+        Crop_Growth_Stage: mapStageToBackend(stage),
+      })
+      setRecommendationResult(result)
+      await loadBackendData()
+    } catch (err: any) {
+      setApiError(err.message || 'Recommendation request failed')
+    } finally {
+      setComputing(false)
+    }
   }
 
-  const filtered = filter === 'all'
-    ? recommendations
-    : recommendations.filter(r => r.status === 'Deployed')
+  // Formatting predictions table
+  const mappedLogs = logsData.length > 0
+    ? logsData.map(log => {
+        const rawConf = log.confidence ?? 0.98
+        const confPct = rawConf > 1 ? rawConf : Math.round(rawConf * 1000) / 10
+        const dateStr = log.created_at ? new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Today'
+        return {
+          id: `#${log.prediction_id ? log.prediction_id.slice(0, 8) : 'FW-9400'}`,
+          formula: log.predicted_fertilizer,
+          conf: confPct,
+          time: dateStr,
+          latency: `${Math.round(log.latency_ms || 28)}ms`,
+          status: log.status === 'success' ? 'Deployed' : 'In Review',
+          statusColor: log.status === 'success' ? 'primary' : 'amber',
+        }
+      })
+    : recommendationsFallback
+
+  const filteredLogs = mappedLogs.filter(r => {
+    const matchesFilter = filter === 'all' || r.status === 'Deployed'
+    const matchesSearch = !searchQuery || r.formula.toLowerCase().includes(searchQuery.toLowerCase()) || r.id.toLowerCase().includes(searchQuery.toLowerCase())
+    return matchesFilter && matchesSearch
+  })
+
+  // Dynamic values derived from backend
+  const displayConfidence = recommendationResult?.confidence
+    ? (recommendationResult.confidence > 1 ? recommendationResult.confidence : Math.round(recommendationResult.confidence * 1000) / 10)
+    : 99.1
+
+  const displayFertilizer = recommendationResult?.fertilizer || 'Urea (46-0-0) + Zinc Chelate'
+
+  const statLoggedCount = statsData?.total_count ?? 156
+  const statAvgConf = statsData?.average_confidence
+    ? (statsData.average_confidence > 1 ? statsData.average_confidence : Math.round(statsData.average_confidence * 1000) / 10)
+    : 98.6
+  const statFrequent = statsData?.most_frequent_fertilizer || 'Urea'
+
+  const isMlHealthy = typeof healthData?.ml_service === 'object'
+    ? healthData?.ml_service?.status === 'healthy'
+    : healthData?.ml_service === 'healthy'
+
+  const healthMetrics = [
+    { icon: 'speed', label: 'FastAPI Latency', value: healthData?.backend === 'healthy' ? (recommendationResult?.latency_ms ? `${recommendationResult.latency_ms.toFixed(0)}ms avg` : '28ms avg') : 'Offline' },
+    { icon: 'memory', label: 'Redis Cache Hit', value: '99.4%' },
+    { icon: 'hub', label: 'XGBoost Node', value: isMlHealthy ? 'Healthy ✓' : 'Checking...' },
+    { icon: 'verified_user', label: 'System Uptime', value: '99.98%' },
+  ]
 
   return (
     <main style={{ minHeight: 'calc(100vh - 60px)', paddingBottom: '3rem' }}>
@@ -198,6 +305,7 @@ export default function OverviewPage() {
               }}>
                 Make the next <span className="text-gradient">application count.</span>
               </h1>
+
               <p style={{
                 fontFamily: 'var(--font-body)',
                 fontSize: '1rem', color: '#555555',
@@ -217,9 +325,9 @@ export default function OverviewPage() {
               borderTop: '1px solid #E2E2DF',
             }} className="stats-grid">
               {[
-                { label: 'Predictions Logged', value: 156, suffix: '', delta: '+12% this cycle', icon: 'monitoring' },
-                { label: 'Average Confidence', value: 98.6, suffix: '%', delta: 'Model v2.4 Active', icon: 'verified' },
-                { label: 'Frequent Recommendation', value: null, text: 'Urea', delta: '41.2% distribution', icon: 'water_drop' },
+                { label: 'Predictions Logged', value: statLoggedCount, suffix: '', delta: '+12% this cycle', icon: 'monitoring' },
+                { label: 'Average Confidence', value: statAvgConf, suffix: '%', delta: 'Model v1 Active', icon: 'verified' },
+                { label: 'Frequent Recommendation', value: null, text: statFrequent, delta: '41.2% distribution', icon: 'water_drop' },
               ].map((stat, i) => (
                 <div key={i} style={{
                   background: '#FAFAF8',
@@ -302,6 +410,18 @@ export default function OverviewPage() {
                 }}>NODE #US-C1-S8</span>
               </div>
 
+              {apiError && (
+                <div style={{
+                  padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)',
+                  background: '#FFF5F5', border: '1px solid #FEB2B2',
+                  color: '#C53030', fontFamily: 'var(--font-body)', fontSize: '0.75rem',
+                  marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem',
+                }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>error</span>
+                  <span>{apiError}</span>
+                </div>
+              )}
+
               {/* pH Slider */}
               <div style={{
                 background: '#FAFAF8', borderRadius: 'var(--radius-lg)',
@@ -353,9 +473,9 @@ export default function OverviewPage() {
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
                   {[
-                    { label: 'N', name: 'Nitrogen', val: nitrogen, set: setNitrogen, fill: 70 },
-                    { label: 'P', name: 'Phosphorus', val: phosphorus, set: setPhosphorus, fill: 45 },
-                    { label: 'K', name: 'Potassium', val: potassium, set: setPotassium, fill: 60 },
+                    { label: 'N', name: 'Nitrogen', val: nitrogen, set: setNitrogen, fill: Math.min(100, Math.round((nitrogen / 200) * 100)) },
+                    { label: 'P', name: 'Phosphorus', val: phosphorus, set: setPhosphorus, fill: Math.min(100, Math.round((phosphorus / 100) * 100)) },
+                    { label: 'K', name: 'Potassium', val: potassium, set: setPotassium, fill: Math.min(100, Math.round((potassium / 200) * 100)) },
                   ].map(n => (
                     <div key={n.label} style={{
                       background: '#FAFAF8',
@@ -470,7 +590,7 @@ export default function OverviewPage() {
                 display: 'flex', flexDirection: 'column', alignItems: 'center',
                 gap: '1rem', marginBottom: '1.25rem', position: 'relative', zIndex: 1,
               }}>
-                <ConfidenceRing value={99.1} />
+                <ConfidenceRing value={displayConfidence} />
                 <div style={{
                   width: '100%', padding: '0.875rem 1rem',
                   borderRadius: 'var(--radius-lg)', background: '#FFFFFF',
@@ -481,11 +601,15 @@ export default function OverviewPage() {
                   <div style={{
                     fontFamily: 'var(--font-display)', fontSize: '1.125rem', fontWeight: 700,
                     color: '#111111', letterSpacing: '-0.02em',
-                  }}>Urea (46-0-0) + Zinc Chelate</div>
+                  }}>{displayFertilizer}</div>
                   <p style={{
                     fontFamily: 'var(--font-body)', fontSize: '0.75rem',
                     color: '#555555', marginTop: '4px',
-                  }}>High nitrogen mobilization with micro-zinc chelation matrix</p>
+                  }}>
+                    {recommendationResult?.latency_ms
+                      ? `Inference Latency: ${recommendationResult.latency_ms.toFixed(1)}ms · Model ${recommendationResult.model_version}`
+                      : 'High nitrogen mobilization with micro-zinc chelation matrix'}
+                  </p>
                 </div>
               </div>
 
@@ -571,7 +695,7 @@ export default function OverviewPage() {
                 Recent Recommendations
               </h2>
               <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.75rem', color: '#666666', marginTop: '2px' }}>
-                Total: {recommendations.length} inference logs across edge clusters
+                Total: {filteredLogs.length} inference logs across edge clusters
               </p>
             </div>
             {/* Filters */}
@@ -581,7 +705,7 @@ export default function OverviewPage() {
                   position: 'absolute', left: '0.625rem', top: '50%', transform: 'translateY(-50%)',
                   color: '#777777', fontSize: '16px',
                 }}>search</span>
-                <input className="input" placeholder="Filter formula..." style={{
+                <input className="input" placeholder="Filter formula..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} style={{
                   paddingLeft: '2rem', width: '170px', borderRadius: 'var(--radius-full)',
                   fontSize: '0.75rem', background: '#FAFAF8',
                 }} />
@@ -600,8 +724,8 @@ export default function OverviewPage() {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
-            {filtered.map((rec, i) => (
-              <div key={rec.id}
+            {filteredLogs.map((rec, i) => (
+              <div key={rec.id + i}
                 ref={el => { if (el) rowsRef.current[i] = el }}
                 className="data-row"
                 style={{
@@ -670,7 +794,7 @@ export default function OverviewPage() {
             borderTop: '1px solid #E2E2DF',
             fontFamily: 'var(--font-body)', fontSize: '0.75rem', color: '#666666',
           }}>
-            <span>Page 1 of 54</span>
+            <span>Page 1 of {statsData?.total_count ? Math.ceil(statsData.total_count / 10) : 1}</span>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button className="btn-secondary" style={{ padding: '0.3rem 0.875rem', fontSize: '0.75rem' }}>Previous</button>
               <button className="btn-secondary" style={{ padding: '0.3rem 0.875rem', fontSize: '0.75rem' }}>Next</button>
@@ -744,4 +868,3 @@ export default function OverviewPage() {
     </main>
   )
 }
-

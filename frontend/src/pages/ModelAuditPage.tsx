@@ -1,10 +1,12 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { api } from '../services/api'
+import type { HealthResponse, ReadinessResponse } from '../services/api'
 
 gsap.registerPlugin(ScrollTrigger)
 
-const modelInfo = {
+const initialModelInfo = {
   name: 'model-v1',
   version: 'v1.0.0',
   created: 'Jun 10, 2025',
@@ -22,12 +24,6 @@ const modelInfo = {
     { feature: 'Growth Stage', importance: 0.063, icon: 'eco' },
   ],
   circuitBreaker: { status: 'CLOSED', failureCount: 0, successCount: 312, lastReset: '2h 14m ago' },
-  services: [
-    { name: 'FastAPI Gateway', status: 'Healthy', latency: '28ms', port: ':8000' },
-    { name: 'ML Inference Service', status: 'Healthy', latency: '18ms', port: ':8001' },
-    { name: 'SQLite Database', status: 'Healthy', latency: '2ms', port: 'local' },
-    { name: 'Prometheus Metrics', status: 'Healthy', latency: '1ms', port: '/metrics' },
-  ],
 }
 
 function ProgressBar({ value }: { value: number }) {
@@ -55,15 +51,50 @@ export default function ModelAuditPage() {
   const heroRef = useRef<HTMLDivElement>(null)
   const cardsRef = useRef<HTMLDivElement>(null)
 
+  const [health, setHealth] = useState<HealthResponse | null>(null)
+  const [readiness, setReadiness] = useState<ReadinessResponse | null>(null)
+
+  useEffect(() => {
+    const fetchSystemTelemetry = async () => {
+      try {
+        const [hRes, rRes] = await Promise.allSettled([
+          api.getSystemHealth(),
+          api.getSystemReadiness(),
+        ])
+        if (hRes.status === 'fulfilled') setHealth(hRes.value)
+        if (rRes.status === 'fulfilled') setReadiness(rRes.value)
+      } catch {
+        // Fallbacks preserved
+      }
+    }
+
+    fetchSystemTelemetry()
+  }, [])
+
   useEffect(() => {
     const ctx = gsap.context(() => {
       gsap.fromTo(heroRef.current, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' })
-      gsap.fromTo(cardsRef.current?.children ?? [], { opacity: 0, y: 20 }, {
-        opacity: 1, y: 0, stagger: 0.1, duration: 0.6, delay: 0.3, ease: 'power2.out',
-      })
+      if (cardsRef.current) {
+        gsap.fromTo(cardsRef.current.children, { opacity: 0, y: 20 }, {
+          opacity: 1, y: 0, stagger: 0.1, duration: 0.6, delay: 0.3, ease: 'power2.out',
+        })
+      }
     })
     return () => ctx.revert()
   }, [])
+
+  const isGatewayHealthy = health?.backend === 'healthy' || readiness?.backend === 'ready'
+  const mlStatusObj = typeof health?.ml_service === 'object' ? health.ml_service : null
+  const isMlHealthy = (mlStatusObj ? mlStatusObj.status === 'healthy' : health?.ml_service === 'healthy') || (typeof readiness?.ml_service === 'object' && readiness.ml_service.status === 'ready')
+  const activeModelVer = mlStatusObj?.model_version || initialModelInfo.version
+
+  const liveServices = [
+    { name: 'FastAPI Gateway', status: isGatewayHealthy ? 'Healthy' : 'Checking', latency: '28ms', port: ':8000' },
+    { name: 'ML Inference Service', status: isMlHealthy ? 'Healthy' : 'Checking', latency: '18ms', port: ':8001' },
+    { name: 'SQLite Database', status: 'Healthy', latency: '2ms', port: 'local' },
+    { name: 'Prometheus Metrics', status: 'Healthy', latency: '1ms', port: '/metrics' },
+  ]
+
 
   return (
     <main style={{ minHeight: 'calc(100vh - 60px)', paddingBottom: '3rem' }}>
@@ -98,17 +129,17 @@ export default function ModelAuditPage() {
                 Ensemble Model Performance
               </h2>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <span className="badge badge-primary" style={{ fontSize: '0.625rem' }}>{modelInfo.name}</span>
-                <span className="badge badge-primary" style={{ fontSize: '0.625rem' }}>{modelInfo.version}</span>
+                <span className="badge badge-primary" style={{ fontSize: '0.625rem' }}>{initialModelInfo.name}</span>
+                <span className="badge badge-primary" style={{ fontSize: '0.625rem' }}>{activeModelVer}</span>
               </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1.75rem' }} className="metric-grid">
               {[
-                { label: 'Test Accuracy', value: `${modelInfo.accuracy}%`, icon: 'verified' },
-                { label: 'F1 Score', value: modelInfo.f1Score.toFixed(3), icon: 'analytics' },
-                { label: 'Precision', value: modelInfo.precision.toFixed(3), icon: 'target' },
-                { label: 'Recall', value: modelInfo.recall.toFixed(3), icon: 'network_check' },
+                { label: 'Test Accuracy', value: `${initialModelInfo.accuracy}%`, icon: 'verified' },
+                { label: 'F1 Score', value: initialModelInfo.f1Score.toFixed(3), icon: 'analytics' },
+                { label: 'Precision', value: initialModelInfo.precision.toFixed(3), icon: 'target' },
+                { label: 'Recall', value: initialModelInfo.recall.toFixed(3), icon: 'network_check' },
               ].map((m, i) => (
                 <div key={i} style={{
                   background: '#FAFAF8', borderRadius: 'var(--radius-lg)',
@@ -134,7 +165,7 @@ export default function ModelAuditPage() {
                 Feature Importance Attribution
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-                {modelInfo.featureImportance.map((f, i) => (
+                {initialModelInfo.featureImportance.map((f, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '160px', flexShrink: 0 }}>
                       <span className="material-symbols-outlined" style={{ color: '#111111', fontSize: '16px', fontVariationSettings: "'FILL' 1" }}>{f.icon}</span>
@@ -185,9 +216,9 @@ export default function ModelAuditPage() {
               </div>
 
               {[
-                { label: 'Failure Count', value: modelInfo.circuitBreaker.failureCount },
-                { label: 'Success Count', value: modelInfo.circuitBreaker.successCount },
-                { label: 'Last Reset', value: modelInfo.circuitBreaker.lastReset },
+                { label: 'Failure Count', value: initialModelInfo.circuitBreaker.failureCount },
+                { label: 'Success Count', value: initialModelInfo.circuitBreaker.successCount },
+                { label: 'Last Reset', value: initialModelInfo.circuitBreaker.lastReset },
               ].map(s => (
                 <div key={s.label} style={{
                   display: 'flex', justifyContent: 'space-between', padding: '0.625rem 0',
@@ -206,8 +237,8 @@ export default function ModelAuditPage() {
                 { label: 'Architecture', value: 'XGBoost + RF Ensemble' },
                 { label: 'Preprocessing', value: 'RobustScaler + OneHot' },
                 { label: 'Feature Schema', value: 'v1.2.0' },
-                { label: 'Trained', value: modelInfo.lastTrained },
-                { label: 'Classes', value: `${modelInfo.classes.length} fertilizers` },
+                { label: 'Trained', value: initialModelInfo.lastTrained },
+                { label: 'Classes', value: `${initialModelInfo.classes.length} fertilizers` },
               ].map(m => (
                 <div key={m.label} style={{
                   display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
@@ -232,7 +263,7 @@ export default function ModelAuditPage() {
               </span>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }} className="service-grid">
-              {modelInfo.services.map((svc, i) => (
+              {liveServices.map((svc, i) => (
                 <div key={i} style={{
                   background: '#FAFAF8', borderRadius: 'var(--radius-lg)',
                   padding: '1.125rem', border: '1px solid #E2E2DF',
@@ -259,7 +290,7 @@ export default function ModelAuditPage() {
               Supported Fertilizer Classes
             </h2>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-              {modelInfo.classes.map((c, i) => (
+              {initialModelInfo.classes.map((c, i) => (
                 <span key={i} className="badge badge-primary" style={{ fontSize: '0.75rem', padding: '0.375rem 0.875rem' }}>
                   <span className="material-symbols-outlined" style={{ fontSize: '13px', fontVariationSettings: "'FILL' 1" }}>eco</span>
                   {c}
@@ -285,4 +316,3 @@ export default function ModelAuditPage() {
     </main>
   )
 }
-

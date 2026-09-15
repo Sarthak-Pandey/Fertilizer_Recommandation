@@ -23,7 +23,7 @@ class Settings(BaseSettings):
         description="Database connection URL",
     )
     ALLOWED_ORIGINS: Union[List[str], str] = Field(
-        default=["http://localhost:3000", "http://localhost:5173"],
+        default=["http://localhost:3000", "http://localhost:5173", "http://127.0.0.1:3000", "http://127.0.0.1:5173"],
         description="Allowed CORS origins",
     )
     MODEL_VERSION: Optional[str] = Field(
@@ -119,13 +119,15 @@ class Settings(BaseSettings):
     @field_validator("ALLOWED_ORIGINS", mode="before")
     @classmethod
     def parse_allowed_origins(cls, v: Union[str, List[str]]) -> List[str]:
+        default_origins = ["http://localhost:3000", "http://localhost:5173", "http://127.0.0.1:3000", "http://127.0.0.1:5173"]
         if isinstance(v, str):
             if not v.strip():
-                return ["http://localhost:3000", "http://localhost:5173"]
+                return default_origins
             return [origin.strip() for origin in v.split(",") if origin.strip()]
         if isinstance(v, list):
             return [str(origin).strip() for origin in v if str(origin).strip()]
-        return ["http://localhost:3000", "http://localhost:5173"]
+        return default_origins
+
 
 
 settings = Settings()
