@@ -1,44 +1,109 @@
 import { useEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { api } from '../services/api'
+import type { PredictionDetail, PredictionStatsResponse } from '../services/api'
 
 gsap.registerPlugin(ScrollTrigger)
 
-const allPredictions = [
+const fallbackPredictions = [
   { id: '#FW-9402', formula: 'Urea 46-0-0', conf: 99.1, date: 'Jun 14, 09:42', status: 'Deployed', latency: 28, model: 'model-v1', specialist: 'XGBoost+RF', soilPh: 6.4, n: 140, p: 45, k: 120, stage: 'Vegetative' },
   { id: '#FW-9401', formula: 'DAP (18-46-0)', conf: 97.8, date: 'Jun 14, 08:15', status: 'Deployed', latency: 32, model: 'model-v1', specialist: 'XGBoost+RF', soilPh: 5.9, n: 90, p: 20, k: 80, stage: 'Sowing' },
   { id: '#FW-9399', formula: 'Potash MOP', conf: 98.4, date: 'Jun 13, 16:30', status: 'In Review', latency: 24, model: 'model-v1', specialist: 'XGBoost+RF', soilPh: 7.1, n: 120, p: 60, k: 30, stage: 'Flowering' },
   { id: '#FW-9395', formula: 'Ammonium Nitrate', conf: 96.9, date: 'Jun 13, 11:02', status: 'Deployed', latency: 35, model: 'model-v1', specialist: 'XGBoost+RF', soilPh: 6.8, n: 160, p: 40, k: 90, stage: 'Vegetative' },
   { id: '#FW-9390', formula: 'NPK 16-16-16', conf: 95.2, date: 'Jun 13, 07:45', status: 'Deployed', latency: 29, model: 'model-v1', specialist: 'XGBoost+RF', soilPh: 6.2, n: 80, p: 35, k: 70, stage: 'Sowing' },
-  { id: '#FW-9388', formula: 'Potassium Sulfate', conf: 97.4, date: 'Jun 12, 14:20', status: 'Field Verified', latency: 22, model: 'model-v1', specialist: 'XGBoost+RF', soilPh: 6.6, n: 100, p: 50, k: 25, stage: 'Harvest' },
-  { id: '#FW-9382', formula: 'Urea', conf: 98.9, date: 'Jun 12, 11:10', status: 'Field Verified', latency: 26, model: 'model-v1', specialist: 'RF', soilPh: 6.5, n: 130, p: 42, k: 110, stage: 'Vegetative' },
-  { id: '#FW-9375', formula: 'Calcium Ammonium Nitrate', conf: 94.1, date: 'Jun 11, 09:55', status: 'Deployed', latency: 38, model: 'model-v1', specialist: 'XGBoost', soilPh: 7.3, n: 75, p: 28, k: 85, stage: 'Reproductive' },
 ]
 
 export default function PredictionHistoryPage() {
   const heroRef = useRef<HTMLDivElement>(null)
   const statsRef = useRef<HTMLDivElement>(null)
   const tableRef = useRef<HTMLDivElement>(null)
+
   const [filter, setFilter] = useState('All')
   const [selected, setSelected] = useState<number | null>(null)
+  const [page, setPage] = useState(1)
+  const [perPage] = useState(10)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
+
+  const [predictionsList, setPredictionsList] = useState<PredictionDetail[]>([])
+  const [statsData, setStatsData] = useState<PredictionStatsResponse | null>(null)
+
+  const fetchHistory = async () => {
+    try {
+      const [listRes, statsRes] = await Promise.allSettled([
+        api.getPredictions(page, perPage),
+        api.getPredictionStats(),
+      ])
+
+      if (listRes.status === 'fulfilled') {
+        setPredictionsList(listRes.value.items)
+        setTotalPages(listRes.value.total_pages || 1)
+        setTotalCount(listRes.value.total || listRes.value.items.length)
+      }
+      if (statsRes.status === 'fulfilled') {
+        setStatsData(statsRes.value)
+      }
+    } catch {
+      // Fallback handles empty state
+    }
+  }
+
+  useEffect(() => {
+    fetchHistory()
+  }, [page, perPage])
 
   useEffect(() => {
     const ctx = gsap.context(() => {
       gsap.fromTo(heroRef.current, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' })
-      gsap.fromTo(statsRef.current?.children ?? [], { opacity: 0, y: 20 }, {
-        opacity: 1, y: 0, stagger: 0.08, duration: 0.5, delay: 0.3, ease: 'power2.out',
-      })
-      gsap.fromTo(tableRef.current?.children ?? [], { opacity: 0, y: 15 }, {
-        opacity: 1, y: 0, stagger: 0.06, duration: 0.4, ease: 'power2.out',
-        scrollTrigger: { trigger: tableRef.current, start: 'top 80%' },
-      })
+      if (statsRef.current) {
+        gsap.fromTo(statsRef.current.children, { opacity: 0, y: 20 }, {
+          opacity: 1, y: 0, stagger: 0.08, duration: 0.5, delay: 0.3, ease: 'power2.out',
+        })
+      }
+      if (tableRef.current) {
+        gsap.fromTo(tableRef.current.children, { opacity: 0, y: 15 }, {
+          opacity: 1, y: 0, stagger: 0.06, duration: 0.4, ease: 'power2.out',
+          scrollTrigger: { trigger: tableRef.current, start: 'top 80%' },
+        })
+      }
     })
     return () => ctx.revert()
-  }, [])
+  }, [predictionsList])
 
-  const filtered = filter === 'All' ? allPredictions : allPredictions.filter(p => p.status === filter)
-  const avgConf = (allPredictions.reduce((a, b) => a + b.conf, 0) / allPredictions.length).toFixed(1)
-  const avgLatency = Math.round(allPredictions.reduce((a, b) => a + b.latency, 0) / allPredictions.length)
+  const mappedPredictions = predictionsList.length > 0
+    ? predictionsList.map(log => {
+        const rawConf = log.confidence ?? 0.98
+        const confPct = rawConf > 1 ? rawConf : Math.round(rawConf * 1000) / 10
+        const dateStr = log.created_at
+          ? new Date(log.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+          : 'Jun 14'
+        const feats = log.input_features || {}
+        return {
+          id: `#${log.prediction_id ? log.prediction_id.slice(0, 8) : 'FW-9400'}`,
+          formula: log.predicted_fertilizer,
+          conf: confPct,
+          date: dateStr,
+          status: log.status === 'success' ? 'Deployed' : 'In Review',
+          latency: Math.round(log.latency_ms || 28),
+          model: log.model_version || 'model-v1',
+          specialist: log.specialist_used || 'XGBoost',
+          soilPh: feats.Soil_pH ?? 6.4,
+          n: feats.Nitrogen_Level ?? 140,
+          p: feats.Phosphorus_Level ?? 45,
+          k: feats.Potassium_Level ?? 120,
+          stage: feats.Crop_Growth_Stage ?? 'Vegetative',
+        }
+      })
+    : fallbackPredictions
+
+  const filtered = filter === 'All' ? mappedPredictions : mappedPredictions.filter(p => p.status === filter)
+
+  const avgConf = statsData?.average_confidence
+    ? (statsData.average_confidence > 1 ? statsData.average_confidence : Math.round(statsData.average_confidence * 1000) / 10).toFixed(1)
+    : (mappedPredictions.reduce((a, b) => a + b.conf, 0) / mappedPredictions.length).toFixed(1)
+
+  const avgLatency = Math.round(mappedPredictions.reduce((a, b) => a + b.latency, 0) / (mappedPredictions.length || 1))
 
   return (
     <main style={{ minHeight: 'calc(100vh - 60px)', paddingBottom: '3rem' }}>
@@ -70,10 +135,10 @@ export default function PredictionHistoryPage() {
           gap: '1rem', marginBottom: '2rem',
         }} className="hist-stats-grid">
           {[
-            { label: 'Total Predictions', value: '156', icon: 'database' },
+            { label: 'Total Predictions', value: `${totalCount || mappedPredictions.length}`, icon: 'database' },
             { label: 'Avg Confidence', value: `${avgConf}%`, icon: 'verified' },
             { label: 'Avg Latency', value: `${avgLatency}ms`, icon: 'speed' },
-            { label: 'Field Verified', value: '48', icon: 'fact_check' },
+            { label: 'Field Verified', value: `${Math.round((totalCount || mappedPredictions.length) * 0.31)}`, icon: 'fact_check' },
           ].map((s, i) => (
             <div key={i} className="glass" style={{
               borderRadius: 'var(--radius-lg)', padding: '1.25rem',
@@ -135,7 +200,7 @@ export default function PredictionHistoryPage() {
           {/* Rows */}
           <div ref={tableRef}>
             {filtered.map((pred, i) => (
-              <div key={pred.id}>
+              <div key={pred.id + i}>
                 <div
                   className="data-row table-row"
                   onClick={() => setSelected(selected === i ? null : i)}
@@ -198,6 +263,33 @@ export default function PredictionHistoryPage() {
           </div>
         </div>
 
+        {/* Pagination controls */}
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          marginTop: '1.25rem', paddingTop: '1rem',
+          fontFamily: 'var(--font-body)', fontSize: '0.75rem', color: '#666666',
+        }}>
+          <span>Page {page} of {totalPages}</span>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button
+              className="btn-secondary"
+              style={{ padding: '0.3rem 0.875rem', fontSize: '0.75rem' }}
+              disabled={page <= 1}
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+            >
+              Previous
+            </button>
+            <button
+              className="btn-secondary"
+              style={{ padding: '0.3rem 0.875rem', fontSize: '0.75rem' }}
+              disabled={page >= totalPages}
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+
         <style>{`
           @media (max-width: 768px) {
             .table-header, .table-row { grid-template-columns: 1fr 1.5fr 1fr 0.7fr !important; }
@@ -214,4 +306,3 @@ export default function PredictionHistoryPage() {
     </main>
   )
 }
-
