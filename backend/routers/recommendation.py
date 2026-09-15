@@ -5,13 +5,15 @@ Recommendation router handling fertilizer recommendation endpoints.
 import logging
 import time
 import uuid
-from fastapi import APIRouter, HTTPException, Request
+from typing import Optional
+from fastapi import APIRouter, Depends, HTTPException, Request
 
 from backend.config import settings
 from backend.database.db import log_prediction
 from backend.middleware.request_id import get_request_id
 from backend.schemas.recommendation import RecommendRequest, RecommendResponse
 from backend.services.ml_client import MLClient, MLServiceError
+from backend.utils.auth_dependency import get_optional_user
 
 logger = logging.getLogger("backend.routers.recommendation")
 
@@ -25,7 +27,11 @@ ml_client = MLClient(
 
 
 @router.post("/recommend", response_model=RecommendResponse)
-async def recommend(http_request: Request, request: RecommendRequest):
+async def recommend(
+    http_request: Request,
+    request: RecommendRequest,
+    current_user: Optional[dict] = Depends(get_optional_user),
+):
     """
     Fertilizer recommendation endpoint.
     Flow: Frontend -> Backend -> ML Service -> DB Persist -> Response
@@ -55,6 +61,8 @@ async def recommend(http_request: Request, request: RecommendRequest):
         "Crop_Growth_Stage": crop_stage_val,
     }
 
+    user_id = current_user.get("id") if current_user else None
+
     start_time = time.perf_counter()
     try:
         ml_result = await ml_client.predict(ml_payload)
@@ -72,6 +80,7 @@ async def recommend(http_request: Request, request: RecommendRequest):
             preprocessing_version="unknown",
             feature_schema_version="unknown",
             request_id=request_id,
+            user_id=user_id,
             latency_ms=latency_ms,
             status="error",
             error_message=str(e),
@@ -95,6 +104,7 @@ async def recommend(http_request: Request, request: RecommendRequest):
         preprocessing_version=preprocessing_version,
         feature_schema_version=feature_schema_version,
         request_id=request_id,
+        user_id=user_id,
         latency_ms=latency_ms,
         status="success",
     )

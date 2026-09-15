@@ -51,10 +51,22 @@ class Settings(BaseSettings):
         description="Logging format: human | json",
     )
 
-    # Authentication
+    # Authentication & Supabase
     API_KEY: str = Field(
         default="dev-secret-key-123",
-        description="API key required for protected endpoints",
+        description="API key required for protected developer endpoints",
+    )
+    SUPABASE_URL: str = Field(
+        default="https://rlltnanuxwlwfagpljgd.supabase.co",
+        description="Supabase project URL",
+    )
+    SUPABASE_KEY: str = Field(
+        default="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsbHRuYW51eHdsd2ZhZ3BsamdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk0ODMyMTgsImV4cCI6MjEwNTA1OTIxOH0.xMenYdnZSazOPGfuaA1dzyi5p4a4a0j_SumrQI7dvqY",
+        description="Supabase anon public key",
+    )
+    SUPABASE_SERVICE_KEY: Optional[str] = Field(
+        default=None,
+        description="Supabase service role secret key for admin bypass operations",
     )
 
     # ML Resilience (Retry)

@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom'
 import { gsap } from 'gsap'
 
 const navLinks = [
-  { to: '/', label: 'Overview' },
+  { to: '/overview', label: 'Overview' },
   { to: '/history', label: 'Prediction History' },
   { to: '/audit', label: 'Model Audit' },
 ]

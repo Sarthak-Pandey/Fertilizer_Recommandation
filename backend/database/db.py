@@ -52,6 +52,7 @@ class PredictionLog(BaseModel):
 
     prediction_id = peewee.CharField(primary_key=True, default=lambda: str(uuid.uuid4()))
     request_id = peewee.CharField(null=True, index=True)
+    user_id = peewee.CharField(null=True, index=True)
 
     # Input features stored as JSON
     input_features = peewee.TextField()
@@ -108,6 +109,7 @@ def log_prediction(
     specialist_used: Optional[str] = None,
     latency_ms: Optional[float] = None,
     request_id: Optional[str] = None,
+    user_id: Optional[str] = None,
     status: str = "success",
     error_message: Optional[str] = None,
 ) -> str:
@@ -120,6 +122,7 @@ def log_prediction(
         PredictionLog.create(
             prediction_id=prediction_id,
             request_id=request_id,
+            user_id=user_id,
             input_features=json.dumps(input_features),
             predicted_fertilizer=predicted_fertilizer,
             gate_decision=gate_decision,

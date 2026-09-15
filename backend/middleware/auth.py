@@ -22,6 +22,8 @@ PUBLIC_PATHS: Set[str] = {
     "/",
     "/api/v1/health",
     "/api/v1/ready",
+    "/api/v1/auth/register",
+    "/api/v1/auth/login",
     "/docs",
     "/openapi.json",
     "/redoc",
@@ -45,15 +47,19 @@ class APIKeyAuthMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
 
         provided_key = request.headers.get(HEADER_API_KEY)
+        auth_header = request.headers.get("Authorization")
         req_id = getattr(request.state, "request_id", None) or get_request_id()
 
-        # Validate key
-        if not provided_key or provided_key != settings.API_KEY:
+        # Allow if valid X-API-Key is provided OR Bearer token is attached
+        is_valid_api_key = provided_key and provided_key == settings.API_KEY
+        is_bearer_present = auth_header and auth_header.startswith("Bearer ")
+
+        if not is_valid_api_key and not is_bearer_present:
             logger.warning(
                 "authentication_failed request_id=%s path=%s reason=%s",
                 req_id,
                 path,
-                "missing_key" if not provided_key else "invalid_key",
+                "missing_auth_header",
             )
             return JSONResponse(
                 status_code=401,
