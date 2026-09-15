@@ -105,6 +105,16 @@ class MLClient:
 
             try:
                 response = await client.post("/predict", json=input_data)
+            except RuntimeError as e:
+                logger.warning("ml_client_event_loop_closed_resetting attempt=%d error=%s", attempt, e)
+                self._client = None
+                client = self._get_client()
+                try:
+                    response = await client.post("/predict", json=input_data)
+                except Exception as inner_e:
+                    logger.error("ml_service_retry_failed url=%s error=%s", url, inner_e)
+                    last_error = MLServiceError(f"ML service error: {inner_e}", status_code=502)
+                    continue
             except httpx.ConnectError as e:
                 logger.error("ml_service_unreachable url=%s error=%s attempt=%d", url, e, attempt)
                 last_error = MLServiceError("ML service is unavailable", status_code=503)

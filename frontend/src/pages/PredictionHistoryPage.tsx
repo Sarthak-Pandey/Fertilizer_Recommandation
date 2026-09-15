@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { api } from '../services/api'
 import type { PredictionDetail, PredictionStatsResponse } from '../services/api'
+import { useAuth } from '../context/AuthContext'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -15,6 +17,7 @@ const fallbackPredictions = [
 ]
 
 export default function PredictionHistoryPage() {
+  const { user, isAuthenticated } = useAuth()
   const heroRef = useRef<HTMLDivElement>(null)
   const statsRef = useRef<HTMLDivElement>(null)
   const tableRef = useRef<HTMLDivElement>(null)
@@ -111,13 +114,43 @@ export default function PredictionHistoryPage() {
 
         {/* Page Header */}
         <div ref={heroRef} style={{ marginBottom: '2rem', opacity: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', marginBottom: '0.625rem' }}>
-            <span className="material-symbols-outlined" style={{ color: '#111111', fontVariationSettings: "'FILL' 1" }}>history</span>
-            <span style={{
-              fontFamily: 'var(--font-body)', fontSize: '0.6875rem', fontWeight: 600,
-              letterSpacing: '0.06em', textTransform: 'uppercase', color: '#666666',
-            }}>Audit Trail</span>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '0.625rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+              <span className="material-symbols-outlined" style={{ color: '#111111', fontVariationSettings: "'FILL' 1" }}>history</span>
+              <span style={{
+                fontFamily: 'var(--font-body)', fontSize: '0.6875rem', fontWeight: 600,
+                letterSpacing: '0.06em', textTransform: 'uppercase', color: '#666666',
+              }}>Audit Trail</span>
+            </div>
+
+            {/* Account Isolation Status Badge */}
+            {isAuthenticated ? (
+              <div style={{
+                padding: '0.375rem 0.875rem', borderRadius: 'var(--radius-full)',
+                background: '#F0F0EC', border: '1px solid #D1D1CB',
+                fontFamily: 'var(--font-body)', fontSize: '0.75rem', fontWeight: 600,
+                color: '#111111', display: 'flex', alignItems: 'center', gap: '0.5rem',
+              }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#111111' }}>lock</span>
+                Showing private farm history for {user?.full_name}
+              </div>
+            ) : (
+              <div style={{
+                padding: '0.375rem 0.875rem', borderRadius: 'var(--radius-full)',
+                background: '#FFF8E1', border: '1px solid #FFE082',
+                fontFamily: 'var(--font-body)', fontSize: '0.75rem', fontWeight: 600,
+                color: '#8D6E63', display: 'flex', alignItems: 'center', gap: '0.5rem',
+              }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>info</span>
+                Guest view mode.{' '}
+                <Link to="/login" style={{ color: '#111111', fontWeight: 700, textDecoration: 'underline' }}>
+                  Sign In
+                </Link>{' '}
+                to access your saved predictions.
+              </div>
+            )}
           </div>
+
           <h1 style={{
             fontFamily: 'var(--font-display)', fontSize: 'clamp(1.75rem, 3.5vw, 2.5rem)',
             fontWeight: 600, letterSpacing: '-0.03em', marginBottom: '0.5rem', color: '#111111',
