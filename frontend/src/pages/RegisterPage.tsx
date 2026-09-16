@@ -68,7 +68,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <main style={{ minHeight: 'calc(100vh - 80px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem 1rem' }}>
+    <main style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem 1rem' }}>
       <div ref={cardRef} className="glass" style={{
         width: '100%', maxWidth: '480px',
         borderRadius: 'var(--radius-xl)',

@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react'
-import { NavLink, Link, useNavigate } from 'react-router-dom'
+import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { useAuth } from '../context/AuthContext'
 
@@ -10,6 +10,7 @@ const navLinks = [
 ]
 
 export default function Navbar() {
+  const location = useLocation()
   const barRef = useRef<HTMLElement>(null)
   const logoRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
@@ -17,22 +18,30 @@ export default function Navbar() {
   const [showDropdown, setShowDropdown] = useState(false)
 
   useEffect(() => {
-    gsap.fromTo(
-      barRef.current,
-      { y: -80, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' }
-    )
-    gsap.fromTo(
-      logoRef.current,
-      { x: -20, opacity: 0 },
-      { x: 0, opacity: 1, duration: 0.6, delay: 0.2, ease: 'power2.out' }
-    )
-  }, [])
+    if (barRef.current) {
+      gsap.fromTo(
+        barRef.current,
+        { y: -80, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' }
+      )
+    }
+    if (logoRef.current) {
+      gsap.fromTo(
+        logoRef.current,
+        { x: -20, opacity: 0 },
+        { x: 0, opacity: 1, duration: 0.6, delay: 0.2, ease: 'power2.out' }
+      )
+    }
+  }, [location.pathname])
 
   const handleLogout = () => {
     logout()
     setShowDropdown(false)
     navigate('/login')
+  }
+
+  if (location.pathname === '/login' || location.pathname === '/register') {
+    return null
   }
 
   return (
