@@ -154,16 +154,18 @@ h1, h2, h3, h4, h5 {
 .pulse-dot {
   position: relative;
   display: flex;
-  width: 7px;
-  height: 7px;
+  align-items: center;
+  justify-content: center;
+  width: 8px;
+  height: 8px;
 }
 
 .pulse-dot::before {
   content: '';
   position: absolute;
-  inset: 0;
+  inset: -1px;
   border-radius: 50%;
-  background: #111111;
+  background: #10B981;
   animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
@@ -171,14 +173,15 @@ h1, h2, h3, h4, h5 {
   content: '';
   position: relative;
   display: flex;
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: #111111;
+  background: #10B981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.7);
 }
 
 @keyframes ping {
-  75%, 100% { transform: scale(2.2); opacity: 0; }
+  75%, 100% { transform: scale(2.4); opacity: 0; }
 }
 
 /* ===== BUTTONS ===== */

@@ -151,14 +151,19 @@ def log_prediction(
 # Query / Read layer functions
 # ---------------------------------------------------------------------------
 
-def get_prediction(prediction_id: str) -> Optional[PredictionLog]:
-    """Retrieve a single PredictionLog entry by ID. Returns None if missing."""
-    return PredictionLog.get_or_none(PredictionLog.prediction_id == prediction_id)
+def get_prediction(prediction_id: str, user_id: Optional[str] = None) -> Optional[PredictionLog]:
+    """Retrieve a single PredictionLog entry by ID. Optionally verifies user_id ownership."""
+    query = PredictionLog.select().where(PredictionLog.prediction_id == prediction_id)
+    if user_id:
+        query = query.where(PredictionLog.user_id == user_id)
+    return query.first()
 
 
-def count_predictions(filters: Optional[dict] = None) -> int:
-    """Return total count of prediction logs, with optional filtering."""
+def count_predictions(filters: Optional[dict] = None, user_id: Optional[str] = None) -> int:
+    """Return total count of prediction logs, with optional filtering and user scoping."""
     query = PredictionLog.select()
+    if user_id:
+        query = query.where(PredictionLog.user_id == user_id)
     if filters and "status" in filters:
         query = query.where(PredictionLog.status == filters["status"])
     return query.count()
@@ -168,35 +173,43 @@ def list_predictions(
     page: int = 1,
     per_page: int = 20,
     filters: Optional[dict] = None,
+    user_id: Optional[str] = None,
 ) -> list[PredictionLog]:
     """
     Return a paginated list of PredictionLog records ordered by newest first.
-    Pagination is applied directly at the database query level.
+    Pagination and user filtering are applied directly at the database query level.
     """
     page = max(1, page)
     per_page = max(1, min(100, per_page))
     offset = (page - 1) * per_page
 
     query = PredictionLog.select()
+    if user_id:
+        query = query.where(PredictionLog.user_id == user_id)
     if filters and "status" in filters:
         query = query.where(PredictionLog.status == filters["status"])
 
     return list(query.order_by(PredictionLog.created_at.desc()).offset(offset).limit(per_page))
 
 
-def get_prediction_stats() -> dict:
+def get_prediction_stats(user_id: Optional[str] = None) -> dict:
     """
     Compute aggregated prediction statistics using database-level aggregation.
-    Returns total count, average confidence, most frequent fertilizer, and daily counts.
+    Optionally scoped to a specific user_id.
     """
-    total_count = PredictionLog.select().count()
+    base_query = PredictionLog.select()
+    if user_id:
+        base_query = base_query.where(PredictionLog.user_id == user_id)
+
+    total_count = base_query.count()
 
     # Average confidence score for successful predictions
-    avg_val = (
-        PredictionLog.select(peewee.fn.AVG(PredictionLog.confidence))
-        .where((PredictionLog.status == "success") & (PredictionLog.confidence.is_null(False)))
-        .scalar()
+    avg_query = PredictionLog.select(peewee.fn.AVG(PredictionLog.confidence)).where(
+        (PredictionLog.status == "success") & (PredictionLog.confidence.is_null(False))
     )
+    if user_id:
+        avg_query = avg_query.where(PredictionLog.user_id == user_id)
+    avg_val = avg_query.scalar()
     average_confidence = round(float(avg_val), 4) if avg_val is not None else None
 
     # Most frequent fertilizer
@@ -206,7 +219,12 @@ def get_prediction_stats() -> dict:
             peewee.fn.COUNT(PredictionLog.prediction_id).alias("cnt"),
         )
         .where(PredictionLog.status == "success")
-        .group_by(PredictionLog.predicted_fertilizer)
+    )
+    if user_id:
+        most_freq_query = most_freq_query.where(PredictionLog.user_id == user_id)
+
+    most_freq_query = (
+        most_freq_query.group_by(PredictionLog.predicted_fertilizer)
         .order_by(peewee.SQL("cnt").desc())
         .limit(1)
     )
@@ -221,14 +239,14 @@ def get_prediction_stats() -> dict:
     else:
         date_expr = peewee.fn.strftime("%Y-%m-%d", PredictionLog.created_at)
 
-    daily_query = (
-        PredictionLog.select(
-            date_expr.alias("day"),
-            peewee.fn.COUNT(PredictionLog.prediction_id).alias("cnt"),
-        )
-        .group_by(date_expr)
-        .order_by(date_expr.asc())
+    daily_query = PredictionLog.select(
+        date_expr.alias("day"),
+        peewee.fn.COUNT(PredictionLog.prediction_id).alias("cnt"),
     )
+    if user_id:
+        daily_query = daily_query.where(PredictionLog.user_id == user_id)
+
+    daily_query = daily_query.group_by(date_expr).order_by(date_expr.asc())
 
     daily_counts = {}
     for row in daily_query:

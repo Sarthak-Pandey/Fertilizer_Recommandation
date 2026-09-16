@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 
 const tabs = [
   { to: '/overview', icon: 'dashboard', label: 'Overview' },
@@ -7,6 +7,12 @@ const tabs = [
 ]
 
 export default function MobileNav() {
+  const location = useLocation()
+
+  if (location.pathname === '/login' || location.pathname === '/register') {
+    return null
+  }
+
   return (
     <nav className="mobile-nav">
       {tabs.map(({ to, icon, label }) => (

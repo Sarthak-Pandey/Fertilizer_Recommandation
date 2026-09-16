@@ -1,3 +1,32 @@
+export interface UserProfile {
+  id: string
+  email: string
+  full_name?: string
+  role?: string
+  organization?: string
+  created_at?: string
+}
+
+export interface UserRegisterPayload {
+  email: string
+  password: string
+  full_name?: string
+  role?: string
+  organization?: string
+}
+
+export interface UserLoginPayload {
+  email: string
+  password: string
+}
+
+export interface AuthTokenResponse {
+  access_token: string
+  refresh_token?: string
+  token_type: string
+  user: UserProfile
+}
+
 export interface RecommendRequest {
   Soil_pH: number
   Nitrogen_Level: number
@@ -81,10 +110,16 @@ const API_KEY = import.meta.env.VITE_API_KEY || 'dev-secret-key-123'
 
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE_URL.replace(/\/$/, '')}${endpoint}`
-  const headers = {
+  const token = localStorage.getItem('auth_token')
+
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     'X-API-Key': API_KEY,
-    ...options.headers,
+    ...(options.headers as Record<string, string>),
+  }
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
   }
 
   const response = await fetch(url, {
@@ -111,6 +146,34 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 }
 
 export const api = {
+  // Authentication API Endpoints
+  async register(data: UserRegisterPayload): Promise<AuthTokenResponse> {
+    return request<AuthTokenResponse>('/api/v1/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  },
+
+  async login(data: UserLoginPayload): Promise<AuthTokenResponse> {
+    return request<AuthTokenResponse>('/api/v1/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  },
+
+  async getMe(): Promise<UserProfile> {
+    return request<UserProfile>('/api/v1/auth/me', {
+      method: 'GET',
+    })
+  },
+
+  async logout(): Promise<{ success: boolean; message: string }> {
+    return request<{ success: boolean; message: string }>('/api/v1/auth/logout', {
+      method: 'POST',
+    })
+  },
+
+  // Prediction & Core System API Endpoints
   async recommendFertilizer(data: RecommendRequest): Promise<RecommendResponse> {
     return request<RecommendResponse>('/api/v1/fertilizer/recommend', {
       method: 'POST',
@@ -148,3 +211,4 @@ export const api = {
     })
   },
 }
+

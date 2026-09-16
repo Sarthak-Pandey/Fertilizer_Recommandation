@@ -3,7 +3,8 @@ Predictions router handling prediction history read endpoints.
 """
 
 import json
-from fastapi import APIRouter, HTTPException, Query
+from typing import Optional
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from backend.database.db import (
     PredictionLog,
@@ -17,6 +18,7 @@ from backend.schemas.prediction import (
     PredictionListResponse,
     PredictionStatsResponse,
 )
+from backend.utils.auth_dependency import get_optional_user
 from backend.utils.pagination import calculate_total_pages, normalize_pagination_params
 
 router = APIRouter(prefix="/api/v1/predictions", tags=["Predictions"])
@@ -55,14 +57,16 @@ def _to_prediction_detail(log: PredictionLog) -> PredictionDetail:
 async def get_predictions(
     page: int = Query(1, ge=1, description="Page number (1-indexed)"),
     per_page: int = Query(20, ge=1, le=100, description="Items per page (1-100)"),
+    current_user: Optional[dict] = Depends(get_optional_user),
 ):
     """
     Retrieve paginated prediction history, ordered by newest first.
-    Pagination is applied at the database level.
+    If authenticated, returns history for the current user.
     """
+    user_id = current_user.get("id") if current_user else None
     norm_page, norm_per_page = normalize_pagination_params(page, per_page)
-    logs = list_predictions(page=norm_page, per_page=norm_per_page)
-    total = count_predictions()
+    logs = list_predictions(page=norm_page, per_page=norm_per_page, user_id=user_id)
+    total = count_predictions(user_id=user_id)
     total_pages = calculate_total_pages(total, norm_per_page)
 
     items = [_to_prediction_detail(log) for log in logs]
@@ -77,12 +81,13 @@ async def get_predictions(
 
 
 @router.get("/stats", response_model=PredictionStatsResponse)
-async def get_stats():
+async def get_stats(current_user: Optional[dict] = Depends(get_optional_user)):
     """
     Retrieve aggregated prediction statistics.
-    Includes total predictions count, average confidence score, most frequent fertilizer, and daily counts.
+    If authenticated, returns statistics for the current user.
     """
-    stats = get_prediction_stats()
+    user_id = current_user.get("id") if current_user else None
+    stats = get_prediction_stats(user_id=user_id)
     return PredictionStatsResponse(
         total_count=stats.get("total_count", 0),
         average_confidence=stats.get("average_confidence"),
@@ -92,12 +97,17 @@ async def get_stats():
 
 
 @router.get("/{prediction_id}", response_model=PredictionDetail)
-async def get_single_prediction(prediction_id: str):
+async def get_single_prediction(
+    prediction_id: str,
+    current_user: Optional[dict] = Depends(get_optional_user),
+):
     """
     Retrieve a single prediction by prediction_id.
-    Returns HTTP 404 if prediction is not found.
+    Returns HTTP 404 if prediction is not found or does not belong to the user.
     """
-    log = get_prediction(prediction_id)
+    user_id = current_user.get("id") if current_user else None
+    log = get_prediction(prediction_id, user_id=user_id)
     if not log:
         raise HTTPException(status_code=404, detail="Prediction not found")
     return _to_prediction_detail(log)
+
