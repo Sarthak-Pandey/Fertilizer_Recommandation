@@ -9,7 +9,7 @@ const tabs = [
 export default function MobileNav() {
   const location = useLocation()
 
-  if (location.pathname === '/login' || location.pathname === '/register') {
+  if (location.pathname === '/' || location.pathname === '/login' || location.pathname === '/register') {
     return null
   }
 
