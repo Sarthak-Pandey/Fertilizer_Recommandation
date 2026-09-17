@@ -1,32 +1,56 @@
-# React + TypeScript + Vite
+# 🌾 Fieldwise — Precision Fertilizer Intelligence (Frontend)
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+An enterprise-grade, editorial React 19 + TypeScript + Vite application powered by ensemble machine learning models for agronomic soil nutrient recommendation.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🎨 Visual Language & Design System
 
-## React Compiler
+- **Aesthetic**: Premium, futuristic, minimal editorial AI startup aesthetic inspired by Antimetal design principles.
+- **Palette**: Warm off-white canvas (`#DCDDD7`), near-black primary text (`#111111`), and subtle warm orange accent (`#FF6B00`).
+- **Typography**: Editorial header typography in **Instrument Serif** paired with **Inter** for clean body text and **Outfit** for metrics.
+- **Interactive Canvas Network**: Custom physics-backed HTML5 Canvas network (`NetworkVisualization.tsx`) featuring circular nodes of varying radii, connection edges, organic drift, magnetic cursor attraction, and an orange-rimmed central node.
+- **Motion & Physics**: **GSAP + ScrollTrigger** entrance timelines and **Lenis** smooth scrolling.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the Oxlint configuration
+## 🗺️ Route Architecture
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```text
+/                   → Public Editorial Landing Page (No Auth Required)
+/login              → User Sign In
+/register           → User Registration
+/overview           → Main Agronomic Dashboard (Protected / Authenticated)
+/history            → Telemetry Prediction History & Log
+/audit              → ML Model Audit & Governance Metrics
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+---
+
+## 🛠️ Stack & Dependencies
+
+- **Framework**: React 19, Vite, TypeScript 5+
+- **Routing**: React Router 7 (`react-router-dom`)
+- **Animation**: GSAP 3, `@gsap/react`, ScrollTrigger
+- **Smooth Scroll**: Lenis (`lenis`)
+- **Icons**: Lucide React & Google Material Symbols Outlined
+
+---
+
+## 🚀 Running Locally
+
+```bash
+# 1. Navigate to frontend directory
+cd frontend
+
+# 2. Install dependencies
+npm install
+
+# 3. Start Vite dev server
+npm run dev
+
+# 4. Build production bundle
+npm run build
+```
+
+The application will launch locally at `http://localhost:5173/` (or next available port).
