@@ -54,16 +54,13 @@ export default function Navbar() {
             <div ref={logoRef} style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
               <div style={{
                 width: '36px', height: '36px', borderRadius: '10px',
+                overflow: 'hidden',
                 background: '#111111',
                 border: '1px solid #111111',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 boxShadow: '0 2px 6px rgba(0,0,0,0.12)',
               }}>
-                <span className="material-symbols-outlined" style={{
-                  color: '#FFFFFF',
-                  fontSize: '20px',
-                  fontVariationSettings: "'FILL' 1"
-                }}>eco</span>
+                <img src="/logo.png" alt="Fieldwise Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
               <div>
                 <div style={{

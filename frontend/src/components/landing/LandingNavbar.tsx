@@ -5,15 +5,15 @@ import { useAuth } from '../../context/AuthContext'
 
 export default function LandingNavbar() {
   const { isAuthenticated } = useAuth()
-  const navRef = useRef<HTMLHeadingElement>(null)
+  const navRef = useRef<HTMLElement>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     if (navRef.current) {
       gsap.fromTo(
         navRef.current,
-        { y: -40, opacity: 0 },
-        { y: 0, opacity: 1, duration: 1, delay: 0.2, ease: 'power3.out' }
+        { y: -30, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.9, delay: 0.1, ease: 'power3.out' }
       )
     }
   }, [])
@@ -48,6 +48,7 @@ export default function LandingNavbar() {
           alignItems: 'center',
           justifyContent: 'space-between',
           pointerEvents: 'auto',
+          gap: '1rem',
         }}
       >
         {/* LEFT NAV PILL */}
@@ -56,7 +57,7 @@ export default function LandingNavbar() {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '1.5rem',
+            gap: '1.25rem',
             padding: '0.45rem 1.25rem',
             borderRadius: '9999px',
           }}
@@ -66,15 +67,16 @@ export default function LandingNavbar() {
             style={{
               background: 'none',
               border: 'none',
-              color: '#333333',
+              color: '#444444',
               fontFamily: 'var(--font-body)',
               fontSize: '0.8125rem',
               fontWeight: 500,
               cursor: 'pointer',
-              transition: 'color 0.2s ease',
+              transition: 'color 0.2s ease, transform 0.2s ease',
+              padding: '0.2rem 0.25rem',
             }}
             onMouseEnter={(e) => (e.currentTarget.style.color = '#111111')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = '#333333')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = '#444444')}
           >
             Product
           </button>
@@ -83,15 +85,16 @@ export default function LandingNavbar() {
             style={{
               background: 'none',
               border: 'none',
-              color: '#333333',
+              color: '#444444',
               fontFamily: 'var(--font-body)',
               fontSize: '0.8125rem',
               fontWeight: 500,
               cursor: 'pointer',
-              transition: 'color 0.2s ease',
+              transition: 'color 0.2s ease, transform 0.2s ease',
+              padding: '0.2rem 0.25rem',
             }}
             onMouseEnter={(e) => (e.currentTarget.style.color = '#111111')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = '#333333')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = '#444444')}
           >
             Architecture
           </button>
@@ -100,15 +103,16 @@ export default function LandingNavbar() {
             style={{
               background: 'none',
               border: 'none',
-              color: '#333333',
+              color: '#444444',
               fontFamily: 'var(--font-body)',
               fontSize: '0.8125rem',
               fontWeight: 500,
               cursor: 'pointer',
-              transition: 'color 0.2s ease',
+              transition: 'color 0.2s ease, transform 0.2s ease',
+              padding: '0.2rem 0.25rem',
             }}
             onMouseEnter={(e) => (e.currentTarget.style.color = '#111111')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = '#333333')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = '#444444')}
           >
             Research
           </button>
@@ -121,29 +125,24 @@ export default function LandingNavbar() {
             display: 'flex',
             alignItems: 'center',
             gap: '0.625rem',
-            padding: '0.45rem 1.75rem',
+            padding: '0.45rem 1.5rem',
             borderRadius: '9999px',
           }}
         >
           <div
             style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 3px)',
-              gridTemplateRows: 'repeat(3, 3px)',
-              gap: '2px',
+              width: '26px',
+              height: '26px',
+              borderRadius: '7px',
+              overflow: 'hidden',
+              background: '#111111',
+              display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
             }}
           >
-            <span style={{ background: '#111111', borderRadius: '50%' }} />
-            <span style={{ background: '#111111', borderRadius: '50%' }} />
-            <span style={{ background: '#111111', borderRadius: '50%' }} />
-            <span style={{ background: '#111111', borderRadius: '50%' }} />
-            <span style={{ background: '#FF6B00', borderRadius: '50%' }} />
-            <span style={{ background: '#111111', borderRadius: '50%' }} />
-            <span style={{ background: '#111111', borderRadius: '50%' }} />
-            <span style={{ background: '#111111', borderRadius: '50%' }} />
-            <span style={{ background: '#111111', borderRadius: '50%' }} />
+            <img src="/logo.png" alt="Fieldwise Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
           <span
             style={{
@@ -151,7 +150,7 @@ export default function LandingNavbar() {
               fontWeight: 600,
               fontSize: '0.9375rem',
               color: '#111111',
-              letterSpacing: '-0.01em',
+              letterSpacing: '-0.015em',
             }}
           >
             Fieldwise
@@ -175,7 +174,7 @@ export default function LandingNavbar() {
               style={{
                 background: '#111111',
                 color: '#FFFFFF',
-                padding: '0.45rem 1.15rem',
+                padding: '0.45rem 1.25rem',
                 borderRadius: '9999px',
                 fontFamily: 'var(--font-body)',
                 fontSize: '0.8125rem',
@@ -191,15 +190,16 @@ export default function LandingNavbar() {
               <Link
                 to="/login"
                 style={{
-                  color: '#333333',
+                  color: '#444444',
                   fontFamily: 'var(--font-body)',
                   fontSize: '0.8125rem',
                   fontWeight: 500,
                   textDecoration: 'none',
                   transition: 'color 0.2s ease',
+                  padding: '0.2rem 0.5rem',
                 }}
                 onMouseEnter={(e) => (e.currentTarget.style.color = '#111111')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = '#333333')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = '#444444')}
               >
                 Sign In
               </Link>
@@ -208,13 +208,14 @@ export default function LandingNavbar() {
                 style={{
                   background: '#111111',
                   color: '#FFFFFF',
-                  padding: '0.45rem 1.15rem',
+                  padding: '0.45rem 1.25rem',
                   borderRadius: '9999px',
                   fontFamily: 'var(--font-body)',
                   fontSize: '0.8125rem',
                   fontWeight: 600,
                   textDecoration: 'none',
                   transition: 'all 0.2s ease',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                 }}
               >
                 Get Started
