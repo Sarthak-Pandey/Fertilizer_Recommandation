@@ -15,13 +15,23 @@ The repository is structured following modern microservice & clean architecture 
 
 ```mermaid
 graph TD
-    User([Farmer / Client App]) -->|HTTP REST| Gateway[Backend API Gateway :8000]
+    User([Visitor / Farmer]) -->|Public Entry| Landing[Public Landing Page /]
+    Landing -->|Sign In / Register| AuthPages[Login / Register Routes]
+    AuthPages -->|Authenticated Session| Dashboard[Fieldwise App Dashboard /overview]
+    
+    subgraph Frontend Stack React + Vite
+        Landing --> Canvas[Interactive Canvas Network Visualization]
+        Landing --> GSAP[GSAP + ScrollTrigger Reveal Timelines]
+        Landing --> Lenis[Lenis Smooth Physics Scroll]
+    end
+
+    Dashboard -->|HTTP REST| Gateway[Backend API Gateway :8000]
     
     subgraph Gateway Middleware Stack
         Gateway --> ID[X-Request-ID Middleware]
-        ID --> CORS[CORS Restriction Policy]
-        CORS --> Auth[X-API-Key Auth Middleware]
-        Auth --> Rate[Rate Limiting Middleware]
+        Gateway --> CORS[CORS Restriction Policy]
+        Gateway --> Auth[Session / JWT Auth Middleware]
+        Gateway --> Rate[Rate Limiting Middleware]
     end
 
     subgraph Service Communication & Resilience
@@ -41,6 +51,18 @@ graph TD
 
 ## ✨ Key Features
 
+- **Editorial Public Landing Page (`frontend/`)**:
+  - **Public Entry Point (`/`)**: High-converting editorial landing page inspired by modern AI startup aesthetics (warm off-white `#DCDDD7` canvas, near-black primary text, subtle `#FF6B00` warm orange accent).
+  - **Interactive HTML5 Canvas Network (`NetworkVisualization.tsx`)**: Physics-backed node network featuring organic floating drift, magnetic cursor attraction/repulsion, node clustering, and a highlighted central node with an orange accent ring.
+  - **GSAP & ScrollTrigger Animations**: Staggered hero entrance timeline, line-by-line text reveals, feature card entrance triggers, and metric counters.
+  - **Lenis Smooth Scroll**: Integrated physics-based smooth scrolling synced seamlessly with GSAP tickers.
+  - **Responsive Floating Navigation (`LandingNavbar.tsx`)**: Glassmorphic pill-shaped header with smooth section scrolling and mobile overlay drawer.
+
+- **Frontend Application & Dashboard**:
+  - **Overview Dashboard (`/overview`)**: Real-time NPK input telemetry, interactive fertilizer prescription engine, and deficiency breakdown charts.
+  - **Prediction History (`/history`)**: Log of past predictions with filtering, telemetry parameters, and export capabilities.
+  - **Model Audit (`/audit`)**: Governance metrics, XGBoost vs. Random Forest confidence scores, feature importance matrices, and latency tracking.
+
 - **API Gateway Layer (`backend/`)**:
   - **Header Authentication (`X-API-Key`)**: Protects recommendation and prediction history APIs while keeping operational health endpoints public.
   - **ML Service Resiliency**: Integrated **Exponential Backoff Retry** (`503`, `504`, `ConnectError`) and **Circuit Breaker** state machine (`CLOSED` ➔ `OPEN` ➔ `HALF_OPEN`) to prevent cascading failures.
@@ -58,23 +80,32 @@ graph TD
 
 ```text
 Fertilizer_Recommend/
+├── frontend/                 # React 19 + TypeScript + Vite Frontend Application
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── landing/      # LandingNavbar, HeroSection, NetworkVisualization, ProductOverview, LandingFooter
+│   │   │   ├── Navbar.tsx    # App navigation header
+│   │   │   └── MobileNav.tsx # Mobile navigation bar
+│   │   ├── context/          # AuthContext session management
+│   │   ├── pages/            # LandingPage (/), OverviewPage, PredictionHistoryPage, ModelAuditPage, LoginPage, RegisterPage
+│   │   ├── services/         # Axios API client & endpoints
+│   │   ├── App.tsx           # Router configuration
+│   │   ├── main.tsx          # App entrypoint
+│   │   └── index.css         # Fieldwise design system & editorial typography
+│   ├── index.html            # Google Fonts (Instrument Serif, Inter, Outfit)
+│   └── package.json          # Dependencies (GSAP, Lenis, Lucide-React, React Router 7)
 ├── backend/                  # FastAPI Gateway service
 │   ├── database/             # Peewee ORM & migrations
-│   │   └── migrations/       # Schema evolution scripts
 │   ├── middleware/           # Auth, Request ID, Rate limit
 │   ├── routers/              # Modular API router endpoints
 │   ├── schemas/              # Pydantic request/response models
 │   ├── services/             # ML HTTP client & Circuit Breaker
-│   ├── config.py             # Settings validation (pydantic-settings)
-│   ├── logging_config.py     # Structured JSON logging
 │   └── main.py               # FastAPI entrypoint & lifespan
 ├── ml-service/               # ML Inference microservice
-│   └── models/               # Model artifacts & version changelog
 ├── training/                 # Model training & preprocessing scripts
 ├── tests/                    # Comprehensive unit & integration test suites
 ├── docker-compose.yml        # Multi-container orchestrator configuration
-├── Dockerfile                # Hardened non-root backend image
-└── README.md                 # Project documentation
+└── README.md                 # System documentation
 ```
 
 ---

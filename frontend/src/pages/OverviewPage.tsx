@@ -912,7 +912,9 @@ export default function OverviewPage() {
           gap: '1rem',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span className="material-symbols-outlined" style={{ color: '#111111', fontSize: '18px', fontVariationSettings: "'FILL' 1" }}>eco</span>
+            <div style={{ width: '20px', height: '20px', borderRadius: '5px', overflow: 'hidden', background: '#111111', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <img src="/logo.png" alt="Fieldwise Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
             <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.75rem', color: '#666666' }}>
               © 2025 Fieldwise Fertilizer Intelligence · Real-time inference cluster v2.4.8 active
             </p>

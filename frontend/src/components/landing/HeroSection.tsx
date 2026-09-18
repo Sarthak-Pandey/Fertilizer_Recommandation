@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext'
 export default function HeroSection() {
   const { isAuthenticated } = useAuth()
   const sectionRef = useRef<HTMLElement>(null)
+  const badgeRef = useRef<HTMLDivElement>(null)
   const titleRef = useRef<HTMLHeadingElement>(null)
   const textRef = useRef<HTMLParagraphElement>(null)
   const ctaRef = useRef<HTMLDivElement>(null)
@@ -17,99 +18,109 @@ export default function HeroSection() {
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
 
       tl.fromTo(
-        titleRef.current,
-        { y: 50, opacity: 0 },
-        { y: 0, opacity: 1, duration: 1.1, delay: 0.3 }
+        badgeRef.current,
+        { y: -15, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.6, delay: 0.15 }
       )
         .fromTo(
+          titleRef.current,
+          { y: 35, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.95 },
+          '-=0.35'
+        )
+        .fromTo(
           textRef.current,
-          { y: 30, opacity: 0 },
-          { y: 0, opacity: 0.85, duration: 0.8 },
-          '-=0.7'
+          { y: 25, opacity: 0 },
+          { y: 0, opacity: 0.9, duration: 0.75 },
+          '-=0.6'
         )
         .fromTo(
           ctaRef.current,
           { y: 20, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.7 },
-          '-=0.5'
+          { y: 0, opacity: 1, duration: 0.65 },
+          '-=0.45'
         )
         .fromTo(
           visRef.current,
-          { opacity: 0, scale: 0.96 },
-          { opacity: 1, scale: 1, duration: 1.2, ease: 'power2.out' },
-          '-=0.9'
+          { opacity: 0, scale: 0.95 },
+          { opacity: 1, scale: 1, duration: 1.1, ease: 'power2.out' },
+          '-=0.85'
         )
     }, sectionRef)
 
     return () => ctx.revert()
   }, [])
 
-  const scrollToResearch = () => {
-    const el = document.getElementById('features')
+  const scrollToProduct = () => {
+    const el = document.getElementById('features') || document.getElementById('product')
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' })
     }
   }
 
   return (
-    <section
-      ref={sectionRef}
-      style={{
-        position: 'relative',
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        paddingTop: '6rem',
-        paddingBottom: '3rem',
-        overflow: 'hidden',
-      }}
-    >
-      <div
-        style={{
-          width: '100%',
-          maxWidth: '1380px',
-          margin: '0 auto',
-          padding: '0 2rem',
-          display: 'grid',
-          gridTemplateColumns: '45% 55%',
-          alignItems: 'center',
-          gap: '2rem',
-        }}
-        className="hero-grid"
-      >
+    <section ref={sectionRef} className="hero-section">
+      <div className="hero-grid">
         {/* LEFT COLUMN: EDITORIAL CONTENT */}
-        <div style={{ zIndex: 2, paddingRight: '1rem' }}>
+        <div style={{ zIndex: 2, paddingRight: '0.5rem' }}>
+          {/* MICRO LABEL */}
+          <div
+            ref={badgeRef}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.25rem 0.75rem',
+              borderRadius: '9999px',
+              border: '1px solid rgba(17, 17, 17, 0.12)',
+              background: 'rgba(255, 255, 255, 0.5)',
+              fontFamily: 'var(--font-body)',
+              fontSize: '0.6875rem',
+              fontWeight: 600,
+              color: '#333333',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              marginBottom: '1.25rem',
+              opacity: 0,
+            }}
+          >
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#FF6B00' }} />
+            Autonomous Agronomic Telemetry
+          </div>
+
+          {/* HEADLINE */}
           <h1
             ref={titleRef}
             className="font-serif"
             style={{
-              fontSize: 'clamp(3rem, 5.5vw, 5.25rem)',
+              fontSize: 'clamp(2.35rem, 4.1vw, 3.85rem)',
               fontWeight: 400,
-              lineHeight: 1.05,
+              lineHeight: 1.08,
               color: '#111111',
-              letterSpacing: '-0.02em',
-              marginBottom: '2rem',
+              letterSpacing: '-0.025em',
+              marginBottom: '1.25rem',
+              maxWidth: '540px',
               opacity: 0,
             }}
           >
-            Agronomic intelligence that runs itself.
+            Turn complex soil telemetry into clear decisions.
           </h1>
 
+          {/* DESCRIPTION */}
           <p
             ref={textRef}
             style={{
               fontFamily: 'var(--font-body)',
-              fontSize: 'clamp(1rem, 1.35vw, 1.25rem)',
+              fontSize: 'clamp(0.9375rem, 1.15vw, 1.125rem)',
               fontWeight: 400,
-              lineHeight: 1.5,
-              color: '#444444',
-              maxWidth: '520px',
-              marginBottom: '2.75rem',
+              lineHeight: 1.55,
+              color: '#555555',
+              maxWidth: '510px',
+              marginBottom: '2.25rem',
               opacity: 0,
             }}
           >
-            Fieldwise is the autonomous decision system for precision agriculture.
-            Continuously understanding soil telemetry, optimizing NPK nutrient ratios, and improving crop yield.
+            Fieldwise deploys ensemble machine learning to analyze NPK telemetry, soil pH, and environmental variables—delivering real-time fertilizer recommendations with agronomic precision.
           </p>
 
           {/* ACTION BUTTONS */}
@@ -118,7 +129,7 @@ export default function HeroSection() {
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '1.25rem',
+              gap: '1rem',
               flexWrap: 'wrap',
               opacity: 0,
             }}
@@ -139,12 +150,8 @@ export default function HeroSection() {
               </Link>
             )}
 
-            <button onClick={scrollToResearch} className="editorial-btn-secondary">
-              <span className="editorial-corner-tl" />
-              <span className="editorial-corner-tr" />
-              <span className="editorial-corner-bl" />
-              <span className="editorial-corner-br" />
-              Explore the research
+            <button onClick={scrollToProduct} className="editorial-btn-secondary">
+              Explore
             </button>
           </div>
         </div>
@@ -154,7 +161,7 @@ export default function HeroSection() {
           ref={visRef}
           style={{
             position: 'relative',
-            height: 'clamp(480px, 68vh, 720px)',
+            height: 'clamp(340px, 52vh, 540px)',
             width: '100%',
             opacity: 0,
           }}
@@ -162,15 +169,6 @@ export default function HeroSection() {
           <NetworkVisualization />
         </div>
       </div>
-
-      <style>{`
-        @media (max-width: 1024px) {
-          .hero-grid {
-            grid-template-columns: 1fr !important;
-            padding-top: 2rem !important;
-          }
-        }
-      `}</style>
     </section>
   )
 }
