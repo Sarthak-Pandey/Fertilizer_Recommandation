@@ -78,13 +78,10 @@ export default function RegisterPage() {
         {/* Brand Logo & Header */}
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div style={{
-            width: '48px', height: '48px', borderRadius: '12px',
-            overflow: 'hidden',
-            background: '#111111', margin: '0 auto 1rem auto',
+            width: '48px', height: '48px', margin: '0 auto 1rem auto',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
           }}>
-            <img src="/logo.png" alt="Fieldwise Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img src="/logo.png" alt="Fieldwise Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.75rem', fontWeight: 700, color: '#111111', letterSpacing: '-0.02em' }}>
             Create an Account

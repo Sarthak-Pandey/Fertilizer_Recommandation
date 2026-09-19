@@ -29,15 +29,12 @@ export default function LandingFooter() {
               style={{
                 width: '28px',
                 height: '28px',
-                borderRadius: '8px',
-                overflow: 'hidden',
-                background: '#111111',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
             >
-              <img src="/logo.png" alt="Fieldwise Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src="/logo.png" alt="Fieldwise Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
             </div>
             <span style={{ fontWeight: 600, fontSize: '1.125rem', color: '#111111', letterSpacing: '-0.02em' }}>
               Fieldwise
