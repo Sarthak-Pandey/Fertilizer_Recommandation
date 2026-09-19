@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1280" viewBox="0 0 1920 1280">
+  <defs>
+    <!-- Drop Shadow for clean visual elevation -->
+    <filter id="shadow" x="-3%" y="-3%" width="106%" height="106%">
+      <feDropShadow dx="2" dy="3" stdDeviation="3" flood-color="#000000" flood-opacity="0.06"/>
+    </filter>
+
+    <!-- Arrowhead Marker for Include / Extend (Open arrowhead UML standard) -->
+    <marker id="uml-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9" fill="none" stroke="#1E293B" stroke-width="1.8" />
+    </marker>
+  </defs>
+
+  <!-- Canvas Background -->
+  <rect width="1920" height="1280" fill="#FFFFFF"/>
+  <rect width="1896" height="1256" x="12" y="12" fill="none" stroke="#E2E8F0" stroke-width="2" rx="10"/>
+
+  <!-- Title Banner -->
+  <text x="960" y="55" font-family="'Segoe UI', Arial, sans-serif" font-size="26" font-weight="bold" fill="#1B5E20" text-anchor="middle">
+    Use Case Diagram of Fieldwise Fertilizer Recommendation System
+  </text>
+  <text x="960" y="82" font-family="'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#047857" text-anchor="middle">
+    Standard UML 2.5 Use Case Notation | Functional Subsystem Boundaries &amp; Actor Interactions
+  </text>
+
+  <!-- ==================== SYSTEM BOUNDARY ==================== -->
+  <g filter="url(#shadow)">
+    <rect x="360" y="115" width="1200" height="1110" rx="20" fill="#F4FBF7" stroke="#2E7D32" stroke-width="2.5"/>
+    <!-- System Subsystem Stereotype Header -->
+    <text x="960" y="148" font-family="'Segoe UI', Arial, sans-serif" font-size="15" font-style="italic" fill="#1B5E20" text-anchor="middle">&lt;&lt;Subsystem&gt;&gt;</text>
+    <text x="960" y="172" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="bold" fill="#1B5E20" text-anchor="middle">Fieldwise Fertilizer Recommendation Platform</text>
+    <line x1="380" y1="188" x2="1540" y2="188" stroke="#A7F3D0" stroke-width="1.5" stroke-dasharray="4,4"/>
+  </g>
+
+
+  <!-- ==================== ACTORS ==================== -->
+
+  <!-- LEFT ACTOR: FARMER / USER -->
+  <g filter="url(#shadow)" transform="translate(140, 560)">
+    <!-- Head -->
+    <circle cx="0" cy="-45" r="24" fill="#E8F5E9" stroke="#1B5E20" stroke-width="2.5"/>
+    <!-- Body -->
+    <line x1="0" y1="-21" x2="0" y2="45" stroke="#1B5E20" stroke-width="2.5"/>
+    <!-- Arms -->
+    <line x1="-38" y1="0" x2="38" y2="0" stroke="#1B5E20" stroke-width="2.5"/>
+    <!-- Legs -->
+    <line x1="0" y1="45" x2="-32" y2="105" stroke="#1B5E20" stroke-width="2.5"/>
+    <line x1="0" y1="45" x2="32" y2="105" stroke="#1B5E20" stroke-width="2.5"/>
+    <!-- Actor Labels -->
+    <text x="0" y="132" font-family="'Segoe UI', Arial, sans-serif" font-size="18" font-weight="bold" fill="#1B5E20" text-anchor="middle">Farmer / User</text>
+    <text x="0" y="152" font-family="'Segoe UI', Arial, sans-serif" font-size="13" fill="#388E3C" text-anchor="middle">(Primary System Actor)</text>
+  </g>
+
+  <!-- RIGHT ACTOR: SUPABASE AUTH SERVICE -->
+  <g filter="url(#shadow)" transform="translate(1760, 270)">
+    <!-- Head -->
+    <circle cx="0" cy="-45" r="24" fill="#EFF6FF" stroke="#1D4ED8" stroke-width="2.5"/>
+    <!-- Body -->
+    <line x1="0" y1="-21" x2="0" y2="45" stroke="#1D4ED8" stroke-width="2.5"/>
+    <!-- Arms -->
+    <line x1="-38" y1="0" x2="38" y2="0" stroke="#1D4ED8" stroke-width="2.5"/>
+    <!-- Legs -->
+    <line x1="0" y1="45" x2="-32" y2="105" stroke="#1D4ED8" stroke-width="2.5"/>
+    <line x1="0" y1="45" x2="32" y2="105" stroke="#1D4ED8" stroke-width="2.5"/>
+    <!-- Actor Labels -->
+    <text x="0" y="130" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-style="italic" fill="#1D4ED8" text-anchor="middle">&lt;&lt;Service&gt;&gt;</text>
+    <text x="0" y="150" font-family="'Segoe UI', Arial, sans-serif" font-size="16" font-weight="bold" fill="#1E40AF" text-anchor="middle">Supabase Authentication</text>
+    <text x="0" y="170" font-family="'Segoe UI', Arial, sans-serif" font-size="16" font-weight="bold" fill="#1E40AF" text-anchor="middle">Service</text>
+  </g>
+
+
+  <!-- ==================== SOLID ASSOCIATION LINES (ACTOR TO USE CASES) ==================== -->
+
+  <!-- Farmer / User Associations (Left Actor to UC1 - UC8) -->
+  <line x1="175" y1="560" x2="475" y2="220" stroke="#1E293B" stroke-width="1.8"/>
+  <line x1="175" y1="560" x2="475" y2="330" stroke="#1E293B" stroke-width="1.8"/>
+  <line x1="175" y1="560" x2="475" y2="440" stroke="#1E293B" stroke-width="1.8"/>
+  <line x1="175" y1="560" x2="465" y2="560" stroke="#1E293B" stroke-width="1.8"/>
+  <line x1="175" y1="560" x2="470" y2="680" stroke="#1E293B" stroke-width="1.8"/>
+  <line x1="175" y1="560" x2="470" y2="800" stroke="#1E293B" stroke-width="1.8"/>
+  <line x1="175" y1="560" x2="475" y2="920" stroke="#1E293B" stroke-width="1.8"/>
+  <line x1="175" y1="560" x2="465" y2="1040" stroke="#1E293B" stroke-width="1.8"/>
+
+  <!-- Supabase Auth Associations (Right Actor to UC1 & UC2) -->
+  <line x1="1720" y1="270" x2="775" y2="220" stroke="#1D4ED8" stroke-width="1.8"/>
+  <line x1="1720" y1="270" x2="775" y2="330" stroke="#1D4ED8" stroke-width="1.8"/>
+
+
+  <!-- ==================== DASHED INCLUDE & EXTEND RELATIONSHIPS ==================== -->
+
+  <!-- UC4 (785, 560) -> UC9 (1040, 380) -->
+  <path d="M 785 550 L 1040 395" fill="none" stroke="#1E293B" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#uml-arrow)"/>
+  <rect x="870" y="458" width="85" height="22" rx="3" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+  <text x="912" y="473" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="600" fill="#1E293B" text-anchor="middle">&lt;&lt;include&gt;&gt;</text>
+
+  <!-- UC4 (785, 560) -> UC10 (1035, 500) -->
+  <path d="M 785 560 L 1035 510" fill="none" stroke="#1E293B" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#uml-arrow)"/>
+  <rect x="868" y="524" width="85" height="22" rx="3" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+  <text x="910" y="539" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="600" fill="#1E293B" text-anchor="middle">&lt;&lt;include&gt;&gt;</text>
+
+  <!-- UC4 (785, 560) -> UC11 (1040, 620) -->
+  <path d="M 785 570 L 1040 610" fill="none" stroke="#1E293B" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#uml-arrow)"/>
+  <rect x="870" y="579" width="85" height="22" rx="3" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+  <text x="912" y="594" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="600" fill="#1E293B" text-anchor="middle">&lt;&lt;include&gt;&gt;</text>
+
+  <!-- UC4 (785, 560) -> UC12 (1025, 740) -->
+  <path d="M 770 585 L 1025 725" fill="none" stroke="#1E293B" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#uml-arrow)"/>
+  <rect x="863" y="644" width="85" height="22" rx="3" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+  <text x="905" y="659" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="600" fill="#1E293B" text-anchor="middle">&lt;&lt;include&gt;&gt;</text>
+
+  <!-- UC4 (785, 560) -> UC13 (1030, 860) -->
+  <path d="M 750 590 L 1030 845" fill="none" stroke="#1E293B" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#uml-arrow)"/>
+  <rect x="865" y="706" width="85" height="22" rx="3" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+  <text x="907" y="721" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="600" fill="#1E293B" text-anchor="middle">&lt;&lt;include&gt;&gt;</text>
+
+  <!-- Get Fertilizer Recommendation (UC4) -> View Recommendation Details (UC5) -->
+  <path d="M 625 596 L 625 647" fill="none" stroke="#1E293B" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#uml-arrow)"/>
+  <rect x="583" y="610" width="85" height="22" rx="3" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+  <text x="625" y="625" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="600" fill="#1E293B" text-anchor="middle">&lt;&lt;include&gt;&gt;</text>
+
+  <!-- Search / Filter History (UC7) <<extend>> View Recommendation History (UC6) -->
+  <path d="M 625 887 L 625 833" fill="none" stroke="#1E293B" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#uml-arrow)"/>
+  <rect x="583" y="849" width="85" height="22" rx="3" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+  <text x="625" y="864" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="600" fill="#1E293B" text-anchor="middle">&lt;&lt;extend&gt;&gt;</text>
+
+  <!-- View Recommendation History (UC6) <<include>> Retrieve Historical Recommendations (UC14) -->
+  <path d="M 770 815 L 1020 965" fill="none" stroke="#1E293B" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#uml-arrow)"/>
+  <rect x="858" y="879" width="85" height="22" rx="3" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+  <text x="900" y="894" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="600" fill="#1E293B" text-anchor="middle">&lt;&lt;include&gt;&gt;</text>
+
+
+  <!-- ==================== USE CASE ELLIPSES (PRIMARY USER-FACING - LEFT COL) ==================== -->
+
+  <!-- UC1: Register Account -->
+  <g filter="url(#shadow)">
+    <ellipse cx="625" cy="220" rx="150" ry="33" fill="#E8F5E9" stroke="#1B5E20" stroke-width="2"/>
+    <text x="625" y="225" font-family="'Segoe UI', Arial, sans-serif" font-size="15" font-weight="bold" fill="#111827" text-anchor="middle">Register Account</text>
+  </g>
+
+  <!-- UC2: Login / Authenticate -->
+  <g filter="url(#shadow)">
+    <ellipse cx="625" cy="330" rx="150" ry="33" fill="#E8F5E9" stroke="#1B5E20" stroke-width="2"/>
+    <text x="625" y="335" font-family="'Segoe UI', Arial, sans-serif" font-size="15" font-weight="bold" fill="#111827" text-anchor="middle">Login / Authenticate</text>
+  </g>
+
+  <!-- UC3: Submit Soil & Crop Data -->
+  <g filter="url(#shadow)">
+    <ellipse cx="625" cy="440" rx="150" ry="33" fill="#E8F5E9" stroke="#1B5E20" stroke-width="2"/>
+    <text x="625" y="445" font-family="'Segoe UI', Arial, sans-serif" font-size="15" font-weight="bold" fill="#111827" text-anchor="middle">Submit Soil &amp; Crop Data</text>
+  </g>
+
+  <!-- UC4: Get Fertilizer Recommendation -->
+  <g filter="url(#shadow)">
+    <ellipse cx="625" cy="560" rx="160" ry="36" fill="#DCFCE7" stroke="#166534" stroke-width="2.5"/>
+    <text x="625" y="565" font-family="'Segoe UI', Arial, sans-serif" font-size="15" font-weight="bold" fill="#064E3B" text-anchor="middle">Get Fertilizer Recommendation</text>
+  </g>
+
+  <!-- UC5: View Recommendation Details -->
+  <g filter="url(#shadow)">
+    <ellipse cx="625" cy="680" rx="155" ry="33" fill="#E8F5E9" stroke="#1B5E20" stroke-width="2"/>
+    <text x="625" y="685" font-family="'Segoe UI', Arial, sans-serif" font-size="15" font-weight="bold" fill="#111827" text-anchor="middle">View Recommendation Details</text>
+  </g>
+
+  <!-- UC6: View Recommendation History -->
+  <g filter="url(#shadow)">
+    <ellipse cx="625" cy="800" rx="155" ry="33" fill="#E8F5E9" stroke="#1B5E20" stroke-width="2"/>
+    <text x="625" y="805" font-family="'Segoe UI', Arial, sans-serif" font-size="15" font-weight="bold" fill="#111827" text-anchor="middle">View Recommendation History</text>
+  </g>
+
+  <!-- UC7: Search / Filter History -->
+  <g filter="url(#shadow)">
+    <ellipse cx="625" cy="920" rx="150" ry="33" fill="#E8F5E9" stroke="#1B5E20" stroke-width="2"/>
+    <text x="625" y="925" font-family="'Segoe UI', Arial, sans-serif" font-size="15" font-weight="bold" fill="#111827" text-anchor="middle">Search / Filter History</text>
+  </g>
+
+  <!-- UC8: View System Audit Dashboard -->
+  <g filter="url(#shadow)">
+    <ellipse cx="625" cy="1040" rx="160" ry="35" fill="#E8F5E9" stroke="#1B5E20" stroke-width="2"/>
+    <text x="625" y="1045" font-family="'Segoe UI', Arial, sans-serif" font-size="15" font-weight="bold" fill="#111827" text-anchor="middle">View System Audit Dashboard</text>
+  </g>
+
+
+  <!-- ==================== USE CASE ELLIPSES (INTERNAL / SUPPORTING - RIGHT COL) ==================== -->
+
+  <!-- UC9: Validate Input Data -->
+  <g filter="url(#shadow)">
+    <ellipse cx="1200" cy="380" rx="160" ry="33" fill="#F4FBF7" stroke="#2E7D32" stroke-width="2"/>
+    <text x="1200" y="385" font-family="'Segoe UI', Arial, sans-serif" font-size="15" font-weight="bold" fill="#1B5E20" text-anchor="middle">Validate Input Data</text>
+  </g>
+
+  <!-- UC10: Preprocess Soil & Crop Data -->
+  <g filter="url(#shadow)">
+    <ellipse cx="1200" cy="500" rx="165" ry="34" fill="#F4FBF7" stroke="#2E7D32" stroke-width="2"/>
+    <text x="1200" y="505" font-family="'Segoe UI', Arial, sans-serif" font-size="15" font-weight="bold" fill="#1B5E20" text-anchor="middle">Preprocess Soil &amp; Crop Data</text>
+  </g>
+
+  <!-- UC11: Run ML Prediction -->
+  <g filter="url(#shadow)">
+    <ellipse cx="1200" cy="620" rx="160" ry="33" fill="#F4FBF7" stroke="#2E7D32" stroke-width="2"/>
+    <text x="1200" y="625" font-family="'Segoe UI', Arial, sans-serif" font-size="15" font-weight="bold" fill="#1B5E20" text-anchor="middle">Run ML Prediction</text>
+  </g>
+
+  <!-- UC12: Generate Fertilizer Recommendation -->
+  <g filter="url(#shadow)">
+    <ellipse cx="1200" cy="740" rx="175" ry="35" fill="#F4FBF7" stroke="#2E7D32" stroke-width="2"/>
+    <text x="1200" y="745" font-family="'Segoe UI', Arial, sans-serif" font-size="15" font-weight="bold" fill="#1B5E20" text-anchor="middle">Generate Fertilizer Recommendation</text>
+  </g>
+
+  <!-- UC13: Store Prediction Audit Record -->
+  <g filter="url(#shadow)">
+    <ellipse cx="1200" cy="860" rx="170" ry="34" fill="#F4FBF7" stroke="#2E7D32" stroke-width="2"/>
+    <text x="1200" y="865" font-family="'Segoe UI', Arial, sans-serif" font-size="15" font-weight="bold" fill="#1B5E20" text-anchor="middle">Store Prediction Audit Record</text>
+  </g>
+
+  <!-- UC14: Retrieve Historical Recommendations -->
+  <g filter="url(#shadow)">
+    <ellipse cx="1200" cy="980" rx="180" ry="35" fill="#F4FBF7" stroke="#2E7D32" stroke-width="2"/>
+    <text x="1200" y="985" font-family="'Segoe UI', Arial, sans-serif" font-size="15" font-weight="bold" fill="#1B5E20" text-anchor="middle">Retrieve Historical Recommendations</text>
+  </g>
+
+  <!-- Footer Info -->
+  <text x="40" y="1250" font-family="'Segoe UI', Arial, sans-serif" font-size="12" fill="#64748B">
+    Fieldwise AI System Architecture • UML Use Case Diagram • Academic Project Documentation
+  </text>
+</svg>
