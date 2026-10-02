@@ -93,6 +93,12 @@ class Settings(BaseSettings):
         description="Cooldown period in seconds before trying HALF_OPEN state",
     )
 
+    # Rate Limiting
+    RATE_LIMIT_DEFAULT: str = Field(
+        default="100/minute",
+        description="Default rate limit (e.g., '100/minute', '1000/hour')",
+    )
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

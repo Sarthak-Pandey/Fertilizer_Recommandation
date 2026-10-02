@@ -20,6 +20,7 @@ HEADER_API_KEY = "X-API-Key"
 PUBLIC_PATHS: Set[str] = {
     "",
     "/",
+    "/metrics",
     "/api/v1/health",
     "/api/v1/ready",
     "/api/v1/auth/register",
