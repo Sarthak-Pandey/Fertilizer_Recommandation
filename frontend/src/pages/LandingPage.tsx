@@ -16,6 +16,7 @@ export default function LandingPage() {
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     })
+    ;(window as any).lenis = lenis
 
     lenis.on('scroll', ScrollTrigger.update)
 

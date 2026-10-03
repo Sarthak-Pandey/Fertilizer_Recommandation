@@ -150,8 +150,12 @@ export default function HeroSection() {
               </Link>
             )}
 
-            <button onClick={scrollToProduct} className="editorial-btn-secondary">
-              Explore
+            <button onClick={scrollToProduct} className="editorial-btn-research">
+              <span className="corner-bracket corner-tl" />
+              <span className="corner-bracket corner-tr" />
+              <span className="corner-bracket corner-bl" />
+              <span className="corner-bracket corner-br" />
+              <span className="btn-pill-capsule">Explore the research</span>
             </button>
           </div>
         </div>
@@ -161,9 +165,10 @@ export default function HeroSection() {
           ref={visRef}
           style={{
             position: 'relative',
-            height: 'clamp(340px, 52vh, 540px)',
+            height: 'clamp(500px, 72vh, 720px)',
             width: '100%',
             opacity: 0,
+            overflow: 'visible',
           }}
         >
           <NetworkVisualization />

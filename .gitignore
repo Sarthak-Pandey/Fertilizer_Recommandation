@@ -64,3 +64,8 @@ Desktop.ini
 
 # Logs
 *.log
+
+# Media & Screen Recordings
+*.mp4
+*.mov
+*.webm
