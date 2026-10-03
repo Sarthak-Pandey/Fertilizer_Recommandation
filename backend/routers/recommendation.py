@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 
 from backend.config import settings
 from backend.database.db import log_prediction
+from backend.middleware.metrics import record_prediction
 from backend.middleware.request_id import get_request_id
 from backend.schemas.recommendation import RecommendRequest, RecommendResponse
 from backend.services.ml_client import MLClient, MLServiceError
@@ -85,6 +86,7 @@ async def recommend(
             status="error",
             error_message=str(e),
         )
+        record_prediction(status="error", fertilizer="N/A", latency_ms=latency_ms)
         raise HTTPException(status_code=e.status_code, detail=str(e))
 
     # Extract results
@@ -108,6 +110,9 @@ async def recommend(
         latency_ms=latency_ms,
         status="success",
     )
+
+    # Record Prometheus metrics
+    record_prediction(status="success", fertilizer=fertilizer, latency_ms=latency_ms)
 
     return RecommendResponse(
         success=True,

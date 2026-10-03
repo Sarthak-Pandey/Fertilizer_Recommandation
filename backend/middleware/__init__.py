@@ -2,9 +2,14 @@
 Backend Middleware Package.
 """
 
-from backend.middleware.request_id import RequestIDMiddleware, get_request_id
+from .auth import APIKeyAuthMiddleware
+from .request_id import RequestIDMiddleware
+from .metrics import PrometheusMiddleware
+from .rate_limit import limiter
 
 __all__ = [
+    "APIKeyAuthMiddleware",
     "RequestIDMiddleware",
-    "get_request_id",
+    "PrometheusMiddleware",
+    "limiter",
 ]
