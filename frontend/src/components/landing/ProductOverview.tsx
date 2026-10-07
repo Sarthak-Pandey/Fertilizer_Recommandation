@@ -118,8 +118,12 @@ export default function ProductOverview() {
       const section = sectionRef.current
       if (!section) return
 
-      const leftCards = section.querySelectorAll('.vstage-card')
-      const depthLines = section.querySelectorAll('.vstack-card-depth')
+      const leftCards = section.querySelectorAll<HTMLElement>('.vstage-card')
+      const depthLines = section.querySelectorAll<HTMLElement>('.vstack-card-depth')
+
+      const easeInOut = gsap.parseEase('power2.inOut')
+      const easeOut = gsap.parseEase('power2.out')
+      const easeSettle = gsap.parseEase('power3.out')
 
       ScrollTrigger.create({
         trigger: section,
@@ -131,19 +135,57 @@ export default function ProductOverview() {
         onUpdate(self) {
           const p = self.progress
 
+          // ─── 0. MIDDLE LAYER EXPANSION (IMAGE 1 -> IMAGE 2 SEPARATION) ───
+          // Organic easeInOut curve for natural physical expansion
+          const rawExpand = gsap.utils.clamp(0, 1, gsap.utils.mapRange(0.00, 0.14, 0, 1, p))
+          const expandP = easeInOut(rawExpand)
+          const middleHeight = expandP * 272
+          const middleMarginTop = expandP * 12
+
+          if (middleLayerRef.current) {
+            gsap.set(middleLayerRef.current, {
+              height: middleHeight,
+              marginTop: middleMarginTop,
+              marginBottom: 12,
+              opacity: expandP > 0 ? 1 : 0,
+              pointerEvents: expandP >= 0.85 ? 'auto' : 'none',
+            })
+          }
+
           // ─── 1. LEFT COLUMN TRANSLATION & CARD STATES ─────────────────────
+          // Smooth eased entrance for Stage 1 & Stage 2 cards
+          const rawC1 = gsap.utils.clamp(0, 1, gsap.utils.mapRange(0.02, 0.14, 0, 1, p))
+          const c1Entrance = easeOut(rawC1)
+
+          const rawC2 = gsap.utils.clamp(0, 1, gsap.utils.mapRange(0.35, 0.50, 0, 1, p))
+          const c2Entrance = easeOut(rawC2)
+
+          leftCards.forEach((card, idx) => {
+            if (idx === 1) {
+              gsap.set(card, {
+                opacity: c1Entrance,
+                y: (1 - c1Entrance) * 30,
+              })
+            } else if (idx === 2) {
+              gsap.set(card, {
+                opacity: c2Entrance,
+                y: (1 - c2Entrance) * 30,
+              })
+            }
+          })
+
           const cardStep = 338 // height + gap in px
 
           let trackY = 0
           if (p < 0.28) {
             trackY = 0
           } else if (p < 0.40) {
-            const t = gsap.utils.mapRange(0.28, 0.40, 0, 1, p)
+            const t = easeInOut(gsap.utils.mapRange(0.28, 0.40, 0, 1, p))
             trackY = -cardStep * t
           } else if (p < 0.64) {
             trackY = -cardStep
           } else if (p < 0.76) {
-            const t = gsap.utils.mapRange(0.64, 0.76, 0, 1, p)
+            const t = easeInOut(gsap.utils.mapRange(0.64, 0.76, 0, 1, p))
             trackY = -cardStep * (1 + t)
           } else {
             trackY = -cardStep * 2
@@ -153,14 +195,12 @@ export default function ProductOverview() {
             gsap.set(leftTrackRef.current, { y: trackY })
           }
 
-          // Card 0 active weight: 1 -> 0 between 0.28 and 0.38
-          const a0 = p < 0.28 ? 1 : p > 0.38 ? 0 : gsap.utils.mapRange(0.28, 0.38, 1, 0, p)
-          // Card 1 active weight: 0 -> 1 between 0.30 and 0.40, 1 -> 0 between 0.64 and 0.74
-          const a1In = p < 0.30 ? 0 : p > 0.40 ? 1 : gsap.utils.mapRange(0.30, 0.40, 0, 1, p)
-          const a1Out = p < 0.64 ? 0 : p > 0.74 ? 1 : gsap.utils.mapRange(0.64, 0.74, 0, 1, p)
+          // Card active weights with smooth S-curve crossfading
+          const a0 = p < 0.28 ? 1 : p > 0.38 ? 0 : 1 - easeInOut(gsap.utils.mapRange(0.28, 0.38, 0, 1, p))
+          const a1In = p < 0.30 ? 0 : p > 0.40 ? 1 : easeInOut(gsap.utils.mapRange(0.30, 0.40, 0, 1, p))
+          const a1Out = p < 0.64 ? 0 : p > 0.74 ? 1 : easeInOut(gsap.utils.mapRange(0.64, 0.74, 0, 1, p))
           const a1 = a1In * (1 - a1Out)
-          // Card 2 active weight: 0 -> 1 between 0.66 and 0.78
-          const a2 = p < 0.66 ? 0 : p > 0.78 ? 1 : gsap.utils.mapRange(0.66, 0.78, 0, 1, p)
+          const a2 = p < 0.66 ? 0 : p > 0.78 ? 1 : easeInOut(gsap.utils.mapRange(0.66, 0.78, 0, 1, p))
 
           const weights = [a0, a1, a2]
           leftCards.forEach((card, idx) => {
@@ -177,16 +217,16 @@ export default function ProductOverview() {
           })
 
           // ─── 2. RIGHT COLUMN ISOMETRIC 3D TILT & DEPTH WIREFRAME ─────────
-          // Enters tilt 0.04 -> 0.18, stays tilted 0.18 -> 0.75, flattens 0.75 -> 0.92
+          // Smooth eased 3D isometric tilt
           let tiltWeight = 0
-          if (p < 0.04) {
+          if (p < 0.06) {
             tiltWeight = 0
-          } else if (p < 0.18) {
-            tiltWeight = gsap.utils.mapRange(0.04, 0.18, 0, 1, p)
+          } else if (p < 0.20) {
+            tiltWeight = easeInOut(gsap.utils.mapRange(0.06, 0.20, 0, 1, p))
           } else if (p < 0.75) {
             tiltWeight = 1
           } else if (p < 0.92) {
-            tiltWeight = gsap.utils.mapRange(0.75, 0.92, 1, 0, p)
+            tiltWeight = 1 - easeInOut(gsap.utils.mapRange(0.75, 0.92, 0, 1, p))
           } else {
             tiltWeight = 0
           }
@@ -194,9 +234,14 @@ export default function ProductOverview() {
           const currentSkewY = -9.5 * tiltWeight
           const currentScaleY = 1 - 0.04 * tiltWeight
 
+          // Organic upward lift as the right stack expands into final loaded state
+          const rawLift = gsap.utils.clamp(0, 1, gsap.utils.mapRange(0.10, 0.55, 0, 1, p))
+          const liftProgress = easeInOut(rawLift)
+          const stackLiftY = -60 * liftProgress
+
           if (stackRef.current) {
             gsap.set(stackRef.current, {
-              transform: `skewY(${currentSkewY}deg) scaleY(${currentScaleY})`,
+              transform: `translate3d(0, ${stackLiftY}px, 0) skewY(${currentSkewY}deg) scaleY(${currentScaleY})`,
             })
           }
 
@@ -205,39 +250,36 @@ export default function ProductOverview() {
           }
 
           // ─── 3. MIDDLE LAYERS STAGGERED REVEAL ────────────────────────────
-          // Agents card reveal: 0.16 -> 0.32
-          const agentsProgress = p < 0.16 ? 0 : p > 0.32 ? 1 : gsap.utils.mapRange(0.16, 0.32, 0, 1, p)
+          // Subtle settling micro-eases for revealed cards and components
+          const agentsProgress = easeSettle(gsap.utils.clamp(0, 1, gsap.utils.mapRange(0.18, 0.32, 0, 1, p)))
           if (agentsCardRef.current) {
             gsap.set(agentsCardRef.current, {
               opacity: agentsProgress,
-              x: (1 - agentsProgress) * 45,
+              x: (1 - agentsProgress) * 40,
             })
           }
 
-          // Dot Box reveal: 0.20 -> 0.36
-          const dotProgress = p < 0.20 ? 0 : p > 0.36 ? 1 : gsap.utils.mapRange(0.20, 0.36, 0, 1, p)
+          const dotProgress = easeSettle(gsap.utils.clamp(0, 1, gsap.utils.mapRange(0.22, 0.38, 0, 1, p)))
           if (dotBoxRef.current) {
             gsap.set(dotBoxRef.current, {
               opacity: dotProgress,
-              scale: 0.92 + 0.08 * dotProgress,
+              scale: 0.93 + 0.07 * dotProgress,
             })
           }
 
-          // World Model card reveal: 0.36 -> 0.52
-          const wmProgress = p < 0.36 ? 0 : p > 0.52 ? 1 : gsap.utils.mapRange(0.36, 0.52, 0, 1, p)
+          const wmProgress = easeSettle(gsap.utils.clamp(0, 1, gsap.utils.mapRange(0.36, 0.52, 0, 1, p)))
           if (worldModelCardRef.current) {
             gsap.set(worldModelCardRef.current, {
               opacity: wmProgress,
-              x: (1 - wmProgress) * 45,
+              x: (1 - wmProgress) * 40,
             })
           }
 
-          // Integration icons row reveal: 0.50 -> 0.68
-          const integProgress = p < 0.50 ? 0 : p > 0.68 ? 1 : gsap.utils.mapRange(0.50, 0.68, 0, 1, p)
+          const integProgress = easeSettle(gsap.utils.clamp(0, 1, gsap.utils.mapRange(0.50, 0.68, 0, 1, p)))
           if (integrationsRef.current) {
             gsap.set(integrationsRef.current, {
               opacity: integProgress,
-              y: (1 - integProgress) * 20,
+              y: (1 - integProgress) * 18,
             })
           }
         },
@@ -249,6 +291,21 @@ export default function ProductOverview() {
 
   return (
     <section ref={sectionRef} className="vstack-section" id="product">
+      {/* ── SECTION INTRO HEADER (Matches editorial header in reference) ── */}
+      <div className="vstack-intro-header">
+        <div className="vstack-intro-meta">
+          <span className="vstack-intro-step">02</span>
+          <span className="vstack-intro-dot" />
+          <span className="vstack-intro-label">Where we sit</span>
+        </div>
+        <div className="vstack-intro-grid">
+          <h2 className="vstack-intro-title">A new layer of the stack</h2>
+          <p className="vstack-intro-desc">
+            Antimetal is the autonomous layer between your team and your production systems.
+          </p>
+        </div>
+      </div>
+
       {/* Sticky two-column frame pinned by GSAP ScrollTrigger */}
       <div className="vstack-sticky-frame">
 
