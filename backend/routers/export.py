@@ -33,7 +33,10 @@ async def export_predictions(
     """
     user_id = current_user.get("id") if current_user else None
 
-    query = PredictionLog.select().where(PredictionLog.status == "success")
+    query = PredictionLog.select().where(
+        (PredictionLog.status == "success")
+        & ((PredictionLog.is_deleted == False) | (PredictionLog.is_deleted.is_null(True)))
+    )
 
     if user_id:
         query = query.where(PredictionLog.user_id == user_id)

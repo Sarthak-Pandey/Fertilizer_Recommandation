@@ -25,8 +25,9 @@ async def analytics_summary(
     average confidence, and average latency.
     """
     user_id = current_user.get("id") if current_user else None
+    active_filter = (PredictionLog.is_deleted == False) | (PredictionLog.is_deleted.is_null(True))
 
-    base = PredictionLog.select()
+    base = PredictionLog.select().where(active_filter)
     if user_id:
         base = base.where(PredictionLog.user_id == user_id)
 
@@ -40,6 +41,7 @@ async def analytics_summary(
         .where(
             (PredictionLog.status == "success")
             & (PredictionLog.confidence.is_null(False))
+            & active_filter
         )
     )
     if user_id:
@@ -51,6 +53,7 @@ async def analytics_summary(
         .where(
             (PredictionLog.status == "success")
             & (PredictionLog.latency_ms.is_null(False))
+            & active_filter
         )
     )
     if user_id:
@@ -75,13 +78,14 @@ async def analytics_distribution(
     Prediction count per fertilizer type (distribution chart data).
     """
     user_id = current_user.get("id") if current_user else None
+    active_filter = (PredictionLog.is_deleted == False) | (PredictionLog.is_deleted.is_null(True))
 
     query = (
         PredictionLog.select(
             PredictionLog.predicted_fertilizer,
             peewee.fn.COUNT(PredictionLog.prediction_id).alias("count"),
         )
-        .where(PredictionLog.status == "success")
+        .where((PredictionLog.status == "success") & active_filter)
     )
     if user_id:
         query = query.where(PredictionLog.user_id == user_id)
@@ -106,6 +110,7 @@ async def analytics_timeline(
     Predictions over time (daily or weekly) for trend visualization.
     """
     user_id = current_user.get("id") if current_user else None
+    active_filter = (PredictionLog.is_deleted == False) | (PredictionLog.is_deleted.is_null(True))
 
     if DATABASE_URL.startswith("postgresql"):
         if granularity == "weekly":
@@ -126,7 +131,7 @@ async def analytics_timeline(
     query = PredictionLog.select(
         date_expr.alias("period"),
         peewee.fn.COUNT(PredictionLog.prediction_id).alias("count"),
-    )
+    ).where(active_filter)
     if user_id:
         query = query.where(PredictionLog.user_id == user_id)
 
@@ -149,6 +154,7 @@ async def analytics_model_performance(
     Average confidence and prediction count per model version.
     """
     user_id = current_user.get("id") if current_user else None
+    active_filter = (PredictionLog.is_deleted == False) | (PredictionLog.is_deleted.is_null(True))
 
     query = (
         PredictionLog.select(
@@ -157,7 +163,7 @@ async def analytics_model_performance(
             peewee.fn.AVG(PredictionLog.confidence).alias("avg_confidence"),
             peewee.fn.AVG(PredictionLog.latency_ms).alias("avg_latency_ms"),
         )
-        .where(PredictionLog.status == "success")
+        .where((PredictionLog.status == "success") & active_filter)
     )
     if user_id:
         query = query.where(PredictionLog.user_id == user_id)

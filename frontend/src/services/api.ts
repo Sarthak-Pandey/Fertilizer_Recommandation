@@ -105,6 +105,50 @@ export interface ReadinessResponse {
   } | string
 }
 
+export interface FeedbackPayload {
+  is_correct: boolean
+  actual_fertilizer?: string
+  notes?: string
+}
+
+export interface FeedbackResponse {
+  feedback_id: string
+  prediction_id: string
+  is_correct: boolean
+  actual_fertilizer?: string | null
+  notes?: string | null
+  created_at: string
+}
+
+export interface AnalyticsSummaryResponse {
+  total_predictions: number
+  success_count: number
+  error_count: number
+  success_rate: number | null
+  average_confidence: number | null
+  average_latency_ms: number | null
+}
+
+export interface AnalyticsDistributionResponse {
+  distribution: Record<string, number>
+}
+
+export interface AnalyticsTimelineResponse {
+  granularity: string
+  timeline: Record<string, number>
+}
+
+export interface ModelPerformanceItem {
+  model_version: string
+  prediction_count: number
+  average_confidence: number | null
+  average_latency_ms: number | null
+}
+
+export interface ModelPerformanceResponse {
+  models: ModelPerformanceItem[]
+}
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 const API_KEY = import.meta.env.VITE_API_KEY || 'dev-secret-key-123'
 
@@ -207,6 +251,83 @@ export const api = {
 
   async getSystemReadiness(): Promise<ReadinessResponse> {
     return request<ReadinessResponse>('/api/v1/ready', {
+      method: 'GET',
+    })
+  },
+
+  // Soft Delete Endpoint
+  async deletePrediction(id: string): Promise<{ success: boolean; message: string; prediction_id: string }> {
+    return request<{ success: boolean; message: string; prediction_id: string }>(`/api/v1/predictions/${id}`, {
+      method: 'DELETE',
+    })
+  },
+
+  // Export Prediction History
+  async exportPredictions(format: 'csv' | 'json' = 'csv', dateFrom?: string, dateTo?: string): Promise<Blob> {
+    const params = new URLSearchParams({ format })
+    if (dateFrom) params.append('date_from', dateFrom)
+    if (dateTo) params.append('date_to', dateTo)
+
+    const url = `${API_BASE_URL.replace(/\/$/, '')}/api/v1/predictions/export?${params.toString()}`
+    const token = localStorage.getItem('auth_token')
+
+    const headers: Record<string, string> = {
+      'X-API-Key': API_KEY,
+    }
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
+    }
+
+    const response = await fetch(url, { headers })
+    if (!response.ok) {
+      let errorMsg = `Export failed: HTTP ${response.status}`
+      try {
+        const errJson = await response.json()
+        if (errJson.detail) errorMsg = errJson.detail
+      } catch {
+        // use default
+      }
+      throw new Error(errorMsg)
+    }
+
+    return response.blob()
+  },
+
+  // Feedback Endpoints
+  async submitFeedback(predictionId: string, data: FeedbackPayload): Promise<FeedbackResponse> {
+    return request<FeedbackResponse>(`/api/v1/predictions/${predictionId}/feedback`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  },
+
+  async getFeedback(predictionId: string): Promise<{ prediction_id: string; feedbacks: FeedbackResponse[] }> {
+    return request<{ prediction_id: string; feedbacks: FeedbackResponse[] }>(`/api/v1/predictions/${predictionId}/feedback`, {
+      method: 'GET',
+    })
+  },
+
+  // Analytics Endpoints
+  async getAnalyticsSummary(): Promise<AnalyticsSummaryResponse> {
+    return request<AnalyticsSummaryResponse>('/api/v1/analytics/summary', {
+      method: 'GET',
+    })
+  },
+
+  async getAnalyticsDistribution(): Promise<AnalyticsDistributionResponse> {
+    return request<AnalyticsDistributionResponse>('/api/v1/analytics/distribution', {
+      method: 'GET',
+    })
+  },
+
+  async getAnalyticsTimeline(granularity: 'daily' | 'weekly' = 'daily'): Promise<AnalyticsTimelineResponse> {
+    return request<AnalyticsTimelineResponse>(`/api/v1/analytics/timeline?granularity=${granularity}`, {
+      method: 'GET',
+    })
+  },
+
+  async getModelPerformance(): Promise<ModelPerformanceResponse> {
+    return request<ModelPerformanceResponse>('/api/v1/analytics/model-performance', {
       method: 'GET',
     })
   },

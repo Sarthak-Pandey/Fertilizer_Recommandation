@@ -12,6 +12,7 @@ from backend.database.db import (
     get_prediction,
     get_prediction_stats,
     list_predictions,
+    soft_delete_prediction,
 )
 from backend.schemas.prediction import (
     PredictionDetail,
@@ -110,4 +111,25 @@ async def get_single_prediction(
     if not log:
         raise HTTPException(status_code=404, detail="Prediction not found")
     return _to_prediction_detail(log)
+
+
+@router.delete("/{prediction_id}")
+async def delete_prediction_endpoint(
+    prediction_id: str,
+    current_user: Optional[dict] = Depends(get_optional_user),
+):
+    """
+    Soft-delete a prediction record by prediction_id.
+    Returns HTTP 404 if prediction is not found or already deleted.
+    """
+    user_id = current_user.get("id") if current_user else None
+    success = soft_delete_prediction(prediction_id, user_id=user_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Prediction not found or already deleted")
+    return {
+        "success": True,
+        "message": "Prediction deleted successfully",
+        "prediction_id": prediction_id,
+    }
+
 
