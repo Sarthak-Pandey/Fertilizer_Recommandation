@@ -305,3 +305,33 @@ def test_recommendation_latency_tracking():
         log_entry = PredictionLog.get_or_none(PredictionLog.prediction_id == data["prediction_id"])
         assert log_entry is not None
         assert log_entry.latency_ms == data["latency_ms"]
+
+
+def test_soft_delete_prediction():
+    """Verify soft deletion endpoint marks record deleted and excludes from queries."""
+    pred_id = log_prediction(
+        input_features={"Soil_pH": 6.8, "Crop_Growth_Stage": "Sowing"},
+        predicted_fertilizer="DAP",
+        model_version="model-v1",
+        preprocessing_version="preprocessing-v1",
+        feature_schema_version="features-v1",
+        confidence=0.95,
+    )
+
+    # Record exists
+    get_res = client.get(f"/api/v1/predictions/{pred_id}")
+    assert get_res.status_code == 200
+
+    # Soft delete it
+    del_res = client.delete(f"/api/v1/predictions/{pred_id}")
+    assert del_res.status_code == 200
+    assert del_res.json()["success"] is True
+
+    # Record now returns 404
+    get_after = client.get(f"/api/v1/predictions/{pred_id}")
+    assert get_after.status_code == 404
+
+    # Deleting again returns 404
+    del_again = client.delete(f"/api/v1/predictions/{pred_id}")
+    assert del_again.status_code == 404
+

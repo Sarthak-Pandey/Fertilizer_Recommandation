@@ -74,6 +74,74 @@ export default function PredictionHistoryPage() {
     return () => ctx.revert()
   }, [predictionsList])
 
+  const [exportingFormat, setExportingFormat] = useState<'csv' | 'json' | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [feedbackStatus, setFeedbackStatus] = useState<Record<string, 'correct' | 'incorrect'>>({})
+
+  const handleExport = async (format: 'csv' | 'json') => {
+    try {
+      setExportingFormat(format)
+      const blob = await api.exportPredictions(format)
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `fieldwise_predictions_${new Date().toISOString().slice(0, 10)}.${format}`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+    } catch (err: any) {
+      alert(err.message || `Failed to export ${format.toUpperCase()}`)
+    } finally {
+      setExportingFormat(null)
+    }
+  }
+
+  const handleDelete = async (rawId: string) => {
+    if (!rawId) {
+      // For fallback dummy data
+      setPredictionsList(prev => prev.filter(p => p.prediction_id !== rawId))
+      setSelected(null)
+      return
+    }
+
+    if (!window.confirm('Are you sure you want to delete this prediction record from history?')) {
+      return
+    }
+
+    try {
+      setDeletingId(rawId)
+      await api.deletePrediction(rawId)
+      setPredictionsList(prev => prev.filter(p => p.prediction_id !== rawId))
+      setSelected(null)
+      setTotalCount(c => Math.max(0, c - 1))
+      // Refresh stats
+      const statsRes = await api.getPredictionStats()
+      setStatsData(statsRes)
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete prediction record')
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
+  const handleFeedback = async (rawId: string, isCorrect: boolean) => {
+    if (!rawId) {
+      setFeedbackStatus(prev => ({ ...prev, [rawId]: isCorrect ? 'correct' : 'incorrect' }))
+      return
+    }
+
+    try {
+      await api.submitFeedback(rawId, {
+        is_correct: isCorrect,
+        notes: isCorrect ? 'Field verification confirmed by grower' : 'Flagged as inaccurate in field review',
+      })
+      setFeedbackStatus(prev => ({ ...prev, [rawId]: isCorrect ? 'correct' : 'incorrect' }))
+    } catch (err: any) {
+      alert(err.message || 'Failed to submit feedback')
+    }
+  }
+
   const mappedPredictions = predictionsList.length > 0
     ? predictionsList.map(log => {
         const rawConf = log.confidence ?? 0.98
@@ -84,6 +152,7 @@ export default function PredictionHistoryPage() {
         const feats = log.input_features || {}
         return {
           id: `#${log.prediction_id ? log.prediction_id.slice(0, 8) : 'FW-9400'}`,
+          rawId: log.prediction_id || '',
           formula: log.predicted_fertilizer,
           conf: confPct,
           date: dateStr,
@@ -98,7 +167,7 @@ export default function PredictionHistoryPage() {
           stage: feats.Crop_Growth_Stage ?? 'Vegetative',
         }
       })
-    : fallbackPredictions
+    : fallbackPredictions.map(f => ({ ...f, rawId: '' }))
 
   const filtered = filter === 'All' ? mappedPredictions : mappedPredictions.filter(p => p.status === filter)
 
@@ -208,10 +277,43 @@ export default function PredictionHistoryPage() {
               boxShadow: filter === f ? '0 1px 4px rgba(0,0,0,0.12)' : 'none',
             }}>{f}</button>
           ))}
-          <span style={{
-            marginLeft: 'auto',
-            fontFamily: 'var(--font-body)', fontSize: '0.75rem', color: '#666666',
-          }}>{filtered.length} records</span>
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.625rem', flexWrap: 'wrap' }}>
+            <span style={{
+              fontFamily: 'var(--font-body)', fontSize: '0.75rem', color: '#666666',
+            }}>{filtered.length} records</span>
+
+            {/* Export Buttons */}
+            <div style={{ display: 'flex', gap: '0.375rem', alignItems: 'center' }}>
+              <button
+                className="btn-secondary"
+                onClick={() => handleExport('csv')}
+                disabled={exportingFormat !== null}
+                title="Download full prediction audit trail as CSV"
+                style={{
+                  padding: '0.35rem 0.75rem', fontSize: '0.75rem',
+                  display: 'flex', alignItems: 'center', gap: '0.375rem',
+                  borderRadius: 'var(--radius-full)', background: '#FFFFFF', border: '1px solid #D1D1CB',
+                }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>download</span>
+                {exportingFormat === 'csv' ? 'Exporting...' : 'Export CSV'}
+              </button>
+              <button
+                className="btn-secondary"
+                onClick={() => handleExport('json')}
+                disabled={exportingFormat !== null}
+                title="Download full prediction audit trail as JSON"
+                style={{
+                  padding: '0.35rem 0.75rem', fontSize: '0.75rem',
+                  display: 'flex', alignItems: 'center', gap: '0.375rem',
+                  borderRadius: 'var(--radius-full)', background: '#FFFFFF', border: '1px solid #D1D1CB',
+                }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>data_object</span>
+                {exportingFormat === 'json' ? 'Exporting...' : 'Export JSON'}
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Prediction Table */}
@@ -288,6 +390,69 @@ export default function PredictionHistoryPage() {
                           <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', fontWeight: 700, color: '#111111', marginTop: '2px', display: 'block' }}>{d.value}</span>
                         </div>
                       ))}
+                    </div>
+
+                    {/* Field Verification & Audit Actions */}
+                    <div style={{
+                      marginTop: '1rem', paddingTop: '1rem',
+                      borderTop: '1px solid #E2E2DF',
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      flexWrap: 'wrap', gap: '0.75rem',
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', flexWrap: 'wrap' }}>
+                        <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.75rem', fontWeight: 600, color: '#444444' }}>
+                          Field Verification:
+                        </span>
+                        {feedbackStatus[pred.rawId] ? (
+                          <span className="badge badge-primary" style={{ fontSize: '0.6875rem' }}>
+                            <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>check_circle</span>
+                            {feedbackStatus[pred.rawId] === 'correct' ? 'Verified Accurate in Field' : 'Reported Inaccurate'}
+                          </span>
+                        ) : (
+                          <>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleFeedback(pred.rawId, true) }}
+                              style={{
+                                padding: '0.3rem 0.75rem', borderRadius: 'var(--radius-full)',
+                                border: '1px solid #C8E6C9', background: '#E8F5E9', color: '#2E7D32',
+                                fontFamily: 'var(--font-body)', fontSize: '0.75rem', fontWeight: 600,
+                                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem',
+                              }}
+                            >
+                              <span>👍</span> Verified Accurate
+                            </button>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleFeedback(pred.rawId, false) }}
+                              style={{
+                                padding: '0.3rem 0.75rem', borderRadius: 'var(--radius-full)',
+                                border: '1px solid #FFCDD2', background: '#FFEBEE', color: '#C62828',
+                                fontFamily: 'var(--font-body)', fontSize: '0.75rem', fontWeight: 600,
+                                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem',
+                              }}
+                            >
+                              <span>👎</span> Inaccurate
+                            </button>
+                          </>
+                        )}
+                      </div>
+
+                      {/* Delete Record Button */}
+                      {pred.rawId && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleDelete(pred.rawId) }}
+                          disabled={deletingId === pred.rawId}
+                          title="Soft-delete this prediction from database"
+                          style={{
+                            background: '#FFF0F0', border: '1px solid #FFCDD2', color: '#D32F2F',
+                            padding: '0.35rem 0.75rem', borderRadius: 'var(--radius-md)',
+                            fontFamily: 'var(--font-body)', fontSize: '0.75rem', fontWeight: 600,
+                            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.375rem',
+                          }}
+                        >
+                          <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>delete</span>
+                          {deletingId === pred.rawId ? 'Deleting...' : 'Delete Record'}
+                        </button>
+                      )}
                     </div>
                   </div>
                 )}

@@ -73,6 +73,10 @@ class PredictionLog(BaseModel):
     status = peewee.CharField(default="success")  # success | error
     error_message = peewee.TextField(null=True)
 
+    # Soft delete support
+    is_deleted = peewee.BooleanField(default=False, index=True)
+    deleted_at = peewee.DateTimeField(null=True)
+
     created_at = peewee.DateTimeField(default=lambda: datetime.now(timezone.utc))
 
     class Meta:
@@ -151,9 +155,16 @@ def log_prediction(
 # Query / Read layer functions
 # ---------------------------------------------------------------------------
 
+def _active_filter():
+    """Helper condition to filter out soft-deleted predictions."""
+    return (PredictionLog.is_deleted == False) | (PredictionLog.is_deleted.is_null(True))
+
+
 def get_prediction(prediction_id: str, user_id: Optional[str] = None) -> Optional[PredictionLog]:
     """Retrieve a single PredictionLog entry by ID. Optionally verifies user_id ownership."""
-    query = PredictionLog.select().where(PredictionLog.prediction_id == prediction_id)
+    query = PredictionLog.select().where(
+        (PredictionLog.prediction_id == prediction_id) & _active_filter()
+    )
     if user_id:
         query = query.where(PredictionLog.user_id == user_id)
     return query.first()
@@ -161,7 +172,7 @@ def get_prediction(prediction_id: str, user_id: Optional[str] = None) -> Optiona
 
 def count_predictions(filters: Optional[dict] = None, user_id: Optional[str] = None) -> int:
     """Return total count of prediction logs, with optional filtering and user scoping."""
-    query = PredictionLog.select()
+    query = PredictionLog.select().where(_active_filter())
     if user_id:
         query = query.where(PredictionLog.user_id == user_id)
     if filters and "status" in filters:
@@ -183,7 +194,7 @@ def list_predictions(
     per_page = max(1, min(100, per_page))
     offset = (page - 1) * per_page
 
-    query = PredictionLog.select()
+    query = PredictionLog.select().where(_active_filter())
     if user_id:
         query = query.where(PredictionLog.user_id == user_id)
     if filters and "status" in filters:
@@ -192,12 +203,34 @@ def list_predictions(
     return list(query.order_by(PredictionLog.created_at.desc()).offset(offset).limit(per_page))
 
 
+def soft_delete_prediction(prediction_id: str, user_id: Optional[str] = None) -> bool:
+    """
+    Soft-delete a prediction record by setting is_deleted=True and updating deleted_at.
+    Returns True if record was found and deleted, False otherwise.
+    """
+    query = PredictionLog.select().where(
+        (PredictionLog.prediction_id == prediction_id) & _active_filter()
+    )
+    if user_id:
+        query = query.where(PredictionLog.user_id == user_id)
+
+    record = query.first()
+    if not record:
+        return False
+
+    record.is_deleted = True
+    record.deleted_at = datetime.now(timezone.utc)
+    record.save()
+    logger.info("prediction_soft_deleted id=%s user_id=%s", prediction_id, user_id)
+    return True
+
+
 def get_prediction_stats(user_id: Optional[str] = None) -> dict:
     """
     Compute aggregated prediction statistics using database-level aggregation.
     Optionally scoped to a specific user_id.
     """
-    base_query = PredictionLog.select()
+    base_query = PredictionLog.select().where(_active_filter())
     if user_id:
         base_query = base_query.where(PredictionLog.user_id == user_id)
 
@@ -205,7 +238,9 @@ def get_prediction_stats(user_id: Optional[str] = None) -> dict:
 
     # Average confidence score for successful predictions
     avg_query = PredictionLog.select(peewee.fn.AVG(PredictionLog.confidence)).where(
-        (PredictionLog.status == "success") & (PredictionLog.confidence.is_null(False))
+        (PredictionLog.status == "success")
+        & (PredictionLog.confidence.is_null(False))
+        & _active_filter()
     )
     if user_id:
         avg_query = avg_query.where(PredictionLog.user_id == user_id)
@@ -218,7 +253,7 @@ def get_prediction_stats(user_id: Optional[str] = None) -> dict:
             PredictionLog.predicted_fertilizer,
             peewee.fn.COUNT(PredictionLog.prediction_id).alias("cnt"),
         )
-        .where(PredictionLog.status == "success")
+        .where((PredictionLog.status == "success") & _active_filter())
     )
     if user_id:
         most_freq_query = most_freq_query.where(PredictionLog.user_id == user_id)
@@ -239,9 +274,12 @@ def get_prediction_stats(user_id: Optional[str] = None) -> dict:
     else:
         date_expr = peewee.fn.strftime("%Y-%m-%d", PredictionLog.created_at)
 
-    daily_query = PredictionLog.select(
-        date_expr.alias("day"),
-        peewee.fn.COUNT(PredictionLog.prediction_id).alias("cnt"),
+    daily_query = (
+        PredictionLog.select(
+            date_expr.alias("day"),
+            peewee.fn.COUNT(PredictionLog.prediction_id).alias("cnt"),
+        )
+        .where(_active_filter())
     )
     if user_id:
         daily_query = daily_query.where(PredictionLog.user_id == user_id)

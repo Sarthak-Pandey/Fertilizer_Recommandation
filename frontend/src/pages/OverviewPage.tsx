@@ -126,6 +126,33 @@ export default function OverviewPage() {
   const [healthData, setHealthData] = useState<HealthResponse | null>(null)
   const [apiError, setApiError] = useState<string | null>(null)
 
+  // Feedback Mechanism States
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState<boolean>(false)
+  const [feedbackSending, setFeedbackSending] = useState<boolean>(false)
+  const [feedbackIsCorrect, setFeedbackIsCorrect] = useState<boolean | null>(null)
+  const [feedbackActualFertilizer, setFeedbackActualFertilizer] = useState<string>('')
+  const [feedbackNotesText, setFeedbackNotesText] = useState<string>('')
+  const [showFeedbackModal, setShowFeedbackModal] = useState<boolean>(false)
+
+  const handleFeedbackSubmit = async (isCorrect: boolean) => {
+    if (!recommendationResult?.prediction_id) return
+    setFeedbackSending(true)
+    try {
+      await api.submitFeedback(recommendationResult.prediction_id, {
+        is_correct: isCorrect,
+        actual_fertilizer: !isCorrect && feedbackActualFertilizer ? feedbackActualFertilizer : undefined,
+        notes: feedbackNotesText || (isCorrect ? 'Grower confirmed recommendation' : 'Field lab recommendation adjusted'),
+      })
+      setFeedbackSubmitted(true)
+      setFeedbackIsCorrect(isCorrect)
+      setShowFeedbackModal(false)
+    } catch (err: any) {
+      alert(err.message || 'Failed to record feedback')
+    } finally {
+      setFeedbackSending(false)
+    }
+  }
+
   const loadBackendData = async (page = logPage) => {
     try {
       const [statsRes, logsRes, healthRes] = await Promise.allSettled([
@@ -214,6 +241,11 @@ export default function OverviewPage() {
   const handleCompute = async () => {
     setComputing(true)
     setApiError(null)
+    setFeedbackSubmitted(false)
+    setFeedbackIsCorrect(null)
+    setFeedbackActualFertilizer('')
+    setFeedbackNotesText('')
+    setShowFeedbackModal(false)
     gsap.to('.compute-btn', { scale: 0.98, duration: 0.1, yoyo: true, repeat: 1 })
 
     try {
@@ -705,6 +737,123 @@ export default function OverviewPage() {
                     <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.625rem', color: '#777777', display: 'block' }}>Net Margin Impact</span>
                     <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', fontWeight: 600, color: '#111111' }}>+$42.20/ha</span>
                   </div>
+                </div>
+
+                {/* Farmer / Agronomist Feedback Box */}
+                <div style={{
+                  marginBottom: '1rem',
+                  padding: '1rem',
+                  borderRadius: 'var(--radius-lg)',
+                  background: '#FAFAF8',
+                  border: '1px solid #E2E2DF',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                    <span style={{
+                      fontFamily: 'var(--font-body)', fontSize: '0.6875rem', fontWeight: 600,
+                      textTransform: 'uppercase', letterSpacing: '0.04em', color: '#555555',
+                      display: 'flex', alignItems: 'center', gap: '0.35rem',
+                    }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '15px', color: '#111111' }}>rate_review</span>
+                      Agronomic Calibration Feedback
+                    </span>
+                    {recommendationResult?.prediction_id && (
+                      <span style={{ fontFamily: 'monospace', fontSize: '0.625rem', color: '#888888' }}>
+                        #{recommendationResult.prediction_id.slice(0, 8)}
+                      </span>
+                    )}
+                  </div>
+
+                  {feedbackSubmitted ? (
+                    <div style={{
+                      padding: '0.625rem 0.75rem',
+                      borderRadius: 'var(--radius-md)',
+                      background: feedbackIsCorrect ? '#E8F5E9' : '#FFF3E0',
+                      border: feedbackIsCorrect ? '1px solid #C8E6C9' : '1px solid #FFE0B2',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      color: feedbackIsCorrect ? '#2E7D32' : '#E65100',
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                    }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+                        {feedbackIsCorrect ? 'check_circle' : 'tune'}
+                      </span>
+                      <span>
+                        {feedbackIsCorrect
+                          ? 'Field calibration logged. Thank you for verifying the prescription!'
+                          : 'Adjustment recorded. Feedback saved for retraining.'}
+                      </span>
+                    </div>
+                  ) : (
+                    <div>
+                      <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.75rem', color: '#666666', marginBottom: '0.625rem' }}>
+                        Is this prescription aligned with your local soil target?
+                      </p>
+                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        <button
+                          type="button"
+                          disabled={feedbackSending}
+                          onClick={() => handleFeedbackSubmit(true)}
+                          style={{
+                            padding: '0.35rem 0.75rem', borderRadius: 'var(--radius-full)',
+                            border: '1px solid #C8E6C9', background: '#FFFFFF', color: '#2E7D32',
+                            fontFamily: 'var(--font-body)', fontSize: '0.75rem', fontWeight: 600,
+                            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.35rem',
+                          }}
+                        >
+                          <span>👍</span> Optimal & Verified
+                        </button>
+                        <button
+                          type="button"
+                          disabled={feedbackSending}
+                          onClick={() => setShowFeedbackModal(v => !v)}
+                          style={{
+                            padding: '0.35rem 0.75rem', borderRadius: 'var(--radius-full)',
+                            border: '1px solid #FFE082', background: '#FFFFFF', color: '#E65100',
+                            fontFamily: 'var(--font-body)', fontSize: '0.75rem', fontWeight: 600,
+                            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.35rem',
+                          }}
+                        >
+                          <span>👎</span> Adjusted Formulation
+                        </button>
+                      </div>
+
+                      {showFeedbackModal && (
+                        <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                          <input
+                            type="text"
+                            placeholder="Actual fertilizer used (e.g. 20-20-0, MOP)"
+                            value={feedbackActualFertilizer}
+                            onChange={(e) => setFeedbackActualFertilizer(e.target.value)}
+                            style={{
+                              padding: '0.4rem 0.625rem', borderRadius: 'var(--radius-md)',
+                              border: '1px solid #D1D1CB', fontSize: '0.75rem', fontFamily: 'var(--font-body)',
+                            }}
+                          />
+                          <input
+                            type="text"
+                            placeholder="Field notes or agronomist comment..."
+                            value={feedbackNotesText}
+                            onChange={(e) => setFeedbackNotesText(e.target.value)}
+                            style={{
+                              padding: '0.4rem 0.625rem', borderRadius: 'var(--radius-md)',
+                              border: '1px solid #D1D1CB', fontSize: '0.75rem', fontFamily: 'var(--font-body)',
+                            }}
+                          />
+                          <button
+                            type="button"
+                            disabled={feedbackSending}
+                            onClick={() => handleFeedbackSubmit(false)}
+                            className="btn-primary"
+                            style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem', width: 'fit-content' }}
+                          >
+                            {feedbackSending ? 'Saving...' : 'Submit Calibration'}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Status Pill */}
