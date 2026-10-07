@@ -17,20 +17,20 @@ const LEFT_STAGES: LeftStage[] = [
   {
     id: 'vision',
     badge: 'THE VISION',
-    title: 'Production should\nrun itself.',
-    body: 'Production is too complex to run manually. Engineers should set direction, ship product, and approve important changes. The rest should be handled autonomously.',
+    title: 'Crop nutrition should\nrun on precision.',
+    body: 'Soil chemistry is too complex to manage by guesswork. Growers should set yield targets, select crops, and approve fertilization schedules. The rest should be handled with algorithmic precision.',
   },
   {
     id: 'worldmodel',
-    badge: 'THE WORLD MODEL',
-    title: 'A layer that owns\nthe runtime.',
-    body: 'At its core sits a live world model, a continuous understanding of how your stack behaves. On top, an army of specialized agents acts on the model to diagnose, fix, prevent, and answer any question.',
+    badge: 'THE AGRONOMIC MODEL',
+    title: 'A layer that owns\nfield intelligence.',
+    body: 'At its core sits an agronomic model, a continuous understanding of soil NPK telemetry, moisture, and crop needs. On top, machine learning models diagnose deficiencies, prevent nutrient lock, and answer any soil query.',
   },
   {
     id: 'autonomous',
-    badge: 'THE AUTONOMOUS LAYER',
-    title: 'Everyone else watches.\nWe operate.',
-    body: 'Most software stops at recommendations and assistance, keeping humans in the loop as the operational layer. Antimetal is designed to continuously investigate, operate, and improve production systems itself.',
+    badge: 'THE INTELLIGENT LAYER',
+    title: 'Everyone else guesses.\nWe prescribe.',
+    body: 'Most tools stop at generic charts, leaving farmers to calculate fertilizer ratios manually. Fieldwise is designed to continuously analyze soil telemetry and formulate exact, crop-specific fertilizer plans automatically.',
   },
 ]
 
@@ -286,12 +286,12 @@ export default function ProductOverview() {
         <div className="vstack-intro-meta">
           <span className="vstack-intro-step">02</span>
           <span className="vstack-intro-dot" />
-          <span className="vstack-intro-label">Where we sit</span>
+          <span className="vstack-intro-label">Field Intelligence</span>
         </div>
         <div className="vstack-intro-grid">
-          <h2 className="vstack-intro-title">A new layer of the stack</h2>
+          <h2 className="vstack-intro-title">An agronomic layer for your crops</h2>
           <p className="vstack-intro-desc">
-            Antimetal is the autonomous layer between your team and your production systems.
+            Fieldwise is the intelligent agronomic layer between your soil telemetry and optimal crop yields.
           </p>
         </div>
       </div>
