@@ -122,7 +122,6 @@ export default function ProductOverview() {
       const depthLines = section.querySelectorAll<HTMLElement>('.vstack-card-depth')
 
       const easeInOut = gsap.parseEase('power2.inOut')
-      const easeOut = gsap.parseEase('power2.out')
       const easeSettle = gsap.parseEase('power3.out')
 
       ScrollTrigger.create({
@@ -153,42 +152,22 @@ export default function ProductOverview() {
           }
 
           // ─── 1. LEFT COLUMN TRANSLATION & CARD STATES ─────────────────────
-          // Smooth eased entrance for Stage 1 & Stage 2 cards
-          const rawC1 = gsap.utils.clamp(0, 1, gsap.utils.mapRange(0.02, 0.14, 0, 1, p))
-          const c1Entrance = easeOut(rawC1)
-
-          const rawC2 = gsap.utils.clamp(0, 1, gsap.utils.mapRange(0.35, 0.50, 0, 1, p))
-          const c2Entrance = easeOut(rawC2)
-
-          leftCards.forEach((card, idx) => {
-            if (idx === 1) {
-              gsap.set(card, {
-                opacity: c1Entrance,
-                y: (1 - c1Entrance) * 30,
-              })
-            } else if (idx === 2) {
-              gsap.set(card, {
-                opacity: c2Entrance,
-                y: (1 - c2Entrance) * 30,
-              })
-            }
-          })
-
-          const cardStep = 338 // height + gap in px
+          const step1 = 363
+          const step2 = 726
 
           let trackY = 0
           if (p < 0.28) {
             trackY = 0
           } else if (p < 0.40) {
             const t = easeInOut(gsap.utils.mapRange(0.28, 0.40, 0, 1, p))
-            trackY = -cardStep * t
+            trackY = -step1 * t
           } else if (p < 0.64) {
-            trackY = -cardStep
+            trackY = -step1
           } else if (p < 0.76) {
             const t = easeInOut(gsap.utils.mapRange(0.64, 0.76, 0, 1, p))
-            trackY = -cardStep * (1 + t)
+            trackY = -step1 - (step2 - step1) * t
           } else {
-            trackY = -cardStep * 2
+            trackY = -step2
           }
 
           if (leftTrackRef.current) {
@@ -202,9 +181,20 @@ export default function ProductOverview() {
           const a1 = a1In * (1 - a1Out)
           const a2 = p < 0.66 ? 0 : p > 0.78 ? 1 : easeInOut(gsap.utils.mapRange(0.66, 0.78, 0, 1, p))
 
+          // Clean fade out of scrolled-out cards to eliminate ghost outlines
+          const card0Op = p < 0.28 ? 1 : p > 0.40 ? 0 : 1 - easeInOut(gsap.utils.mapRange(0.28, 0.40, 0, 1, p))
+          const card1In = p < 0.16 ? 0 : p > 0.36 ? 1 : easeInOut(gsap.utils.mapRange(0.16, 0.36, 0, 1, p))
+          const card1Out = p < 0.64 ? 0 : p > 0.76 ? 1 : easeInOut(gsap.utils.mapRange(0.64, 0.76, 0, 1, p))
+          const card1Op = card1In * (1 - card1Out)
+          const card2Op = p < 0.52 ? 0 : p > 0.74 ? 1 : easeInOut(gsap.utils.mapRange(0.52, 0.74, 0, 1, p))
+          const cardOpacities = [card0Op, card1Op, card2Op]
+
           const weights = [a0, a1, a2]
           leftCards.forEach((card, idx) => {
             const w = weights[idx] ?? 0
+            const op = cardOpacities[idx] ?? 1
+            gsap.set(card, { opacity: op })
+
             const darkBg = card.querySelector('.vstage-dark-bg')
             const activeContent = card.querySelector('.vstage-content-active')
             const inactiveContent = card.querySelector('.vstage-content-inactive')
@@ -358,10 +348,10 @@ export default function ProductOverview() {
         <div className="vstack-right">
           <div ref={stackRef} className="vstack-3d-stack">
 
-            {/* Card 1: Your Team (always visible) */}
+            {/* Card 1: Sanya (always visible) */}
             <RightCard
-              title="Your Team"
-              subtitle="Defines priorities, direction, and goals."
+              title="Sanya"
+              subtitle="Team Leader Decide the Direction of the Project."
               className="vstack-card-team"
               hasDepth={true}
               hasConnector={true}
@@ -373,22 +363,22 @@ export default function ProductOverview() {
               <div className="vstack-middle-grid">
                 {/* Left Sub-column */}
                 <div className="vstack-middle-subcol">
-                  {/* Card 2: Antimetal Agents */}
+                  {/* Card 2: Sanyam */}
                   <div ref={agentsCardRef} className="vstack-subcard-wrap">
                     <RightCard
-                      title="Antimetal Agents"
-                      subtitle="Army of specialists that act on production."
+                      title="Sanyam"
+                      subtitle="Desginer of the Project."
                       className="vstack-card-agents"
                       hasDepth={true}
                       hasConnector={false}
                     />
                   </div>
 
-                  {/* Card 3: Antimetal World Model */}
+                  {/* Card 3: Saransh */}
                   <div ref={worldModelCardRef} className="vstack-subcard-wrap">
                     <RightCard
-                      title="Antimetal World Model"
-                      subtitle="A live view of how your stack actually behaves."
+                      title="Saransh"
+                      subtitle="Business Analyst of the Project"
                       className="vstack-card-worldmodel"
                       hasDepth={true}
                       hasConnector={true}
@@ -396,35 +386,16 @@ export default function ProductOverview() {
                   </div>
                 </div>
 
-                {/* Right Sub-column: Dot Pyramid Chevron Box */}
+                {/* Right Sub-column: Logo Box */}
                 <div ref={dotBoxRef} className="vstack-dot-box">
                   <CornerBrackets />
                   <DepthWireframe hasConnector={false} />
                   <div className="vstack-dot-box-inner">
-                    {/* Exact 10-dot Chevron Formation from video */}
-                    <svg
-                      width="92"
-                      height="84"
-                      viewBox="0 0 120 110"
-                      fill="none"
-                      className="vstack-chevron-svg"
-                      aria-hidden="true"
-                    >
-                      {/* Apex: 1 dot */}
-                      <circle cx="60" cy="20" r="6" fill="#161514" />
-                      {/* Row 2: 3 dots */}
-                      <circle cx="44" cy="40" r="6" fill="#161514" />
-                      <circle cx="60" cy="40" r="6" fill="#161514" />
-                      <circle cx="76" cy="40" r="6" fill="#161514" />
-                      {/* Row 3: 4 dots */}
-                      <circle cx="28" cy="60" r="6" fill="#161514" />
-                      <circle cx="44" cy="60" r="6" fill="#161514" />
-                      <circle cx="76" cy="60" r="6" fill="#161514" />
-                      <circle cx="92" cy="60" r="6" fill="#161514" />
-                      {/* Row 4: 2 dots */}
-                      <circle cx="28" cy="80" r="6" fill="#161514" />
-                      <circle cx="92" cy="80" r="6" fill="#161514" />
-                    </svg>
+                    <img
+                      src="/logo.png"
+                      alt="Fieldwise Logo"
+                      className="vstack-logo-img"
+                    />
                   </div>
                 </div>
               </div>
@@ -447,17 +418,17 @@ export default function ProductOverview() {
                 <div className="vstack-integ-chip vstack-integ-more-chip">
                   <CornerBrackets />
                   <div className="vstack-integ-chip-inner">
-                    <span className="vstack-integ-more-text">+ 92 more</span>
+                    <span className="vstack-integ-more-text">+4 more</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Card 4: Production (always visible at bottom) */}
+            {/* Card 4: Sarthak (always visible at bottom) */}
             <div ref={productionCardRef} className="vstack-production-wrap">
               <RightCard
-                title="Production"
-                subtitle="Runtime systems, infrastructure, code execution, and everything around them."
+                title="Sarthak"
+                subtitle="In the Team."
                 className="vstack-card-production"
                 hasDepth={true}
                 hasConnector={false}

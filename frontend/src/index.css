@@ -986,7 +986,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
   align-items: center;
   justify-content: center;
   gap: clamp(3rem, 5.5vw, 6.5rem);
-  padding: 1.5rem clamp(1.5rem, 4vw, 4rem) 2rem;
+  padding: 2rem clamp(1.5rem, 4vw, 4rem) 2rem;
   max-width: 1480px;
   margin: 0 auto;
   overflow: hidden;
@@ -998,11 +998,14 @@ input[type="range"]::-webkit-slider-thumb:hover {
   flex: 0 0 clamp(380px, 32vw, 490px);
   position: relative;
   align-self: center;
+  margin-top: -30px;
 }
 
 .vstack-left-viewport {
   width: 100%;
+  height: 335px;
   position: relative;
+  overflow: hidden;
 }
 
 .vstack-left-track {
@@ -1016,7 +1019,8 @@ input[type="range"]::-webkit-slider-thumb:hover {
 .vstage-card {
   position: relative;
   width: 100%;
-  min-height: 310px;
+  height: 335px;
+  min-height: 335px;
   border: 1px dashed rgba(22, 21, 20, 0.28);
   box-sizing: border-box;
   background: transparent;
@@ -1035,11 +1039,12 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
 /* Stage content wrappers */
 .vstage-content {
-  padding: 2.2rem 2.2rem 2.4rem;
+  padding: 2.1rem 2.2rem 2.1rem;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: center;
   box-sizing: border-box;
+  height: 100%;
 }
 
 .vstage-content-inactive {
@@ -1074,13 +1079,11 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
 .vstage-card[data-stage="1"] {
   opacity: 0;
-  transform: translateY(35px);
   will-change: transform, opacity;
 }
 
 .vstage-card[data-stage="2"] {
   opacity: 0;
-  transform: translateY(35px);
   will-change: transform, opacity;
 }
 
@@ -1092,33 +1095,33 @@ input[type="range"]::-webkit-slider-thumb:hover {
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: #8E8D88;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
 }
 
 .vstage-content-inactive .vstage-title {
   font-family: var(--font-serif);
-  font-size: clamp(2rem, 2.5vw, 2.45rem);
+  font-size: clamp(1.95rem, 2.4vw, 2.4rem);
   font-weight: 400;
-  line-height: 1.12;
+  line-height: 1.14;
   color: #161514;
   letter-spacing: -0.015em;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.1rem;
 }
 
 .vstage-content-active .vstage-title {
   font-family: var(--font-serif);
-  font-size: clamp(2rem, 2.5vw, 2.45rem);
+  font-size: clamp(1.95rem, 2.4vw, 2.4rem);
   font-weight: 400;
-  line-height: 1.12;
+  line-height: 1.14;
   color: #FFFFFF;
   letter-spacing: -0.015em;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.1rem;
 }
 
 .vstage-content-inactive .vstage-body {
   font-family: var(--font-body);
   font-size: 0.875rem;
-  line-height: 1.6;
+  line-height: 1.55;
   color: #5E5B54;
   font-weight: 400;
   margin: 0;
@@ -1127,7 +1130,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 .vstage-content-active .vstage-body {
   font-family: var(--font-body);
   font-size: 0.875rem;
-  line-height: 1.6;
+  line-height: 1.55;
   color: #92928C;
   font-weight: 400;
   margin: 0;
@@ -1361,8 +1364,12 @@ input[type="range"]::-webkit-slider-thumb:hover {
   background: transparent;
 }
 
-.vstack-chevron-svg {
+.vstack-chevron-svg,
+.vstack-logo-img {
   display: block;
+  width: 92px;
+  height: 84px;
+  object-fit: contain;
 }
 
 /* ── INTEGRATION CHIPS ROW ───────────────────── */
