@@ -205,10 +205,4 @@ curl -X POST http://localhost:8000/api/v1/fertilizer/recommend \
   "prediction_id": "8f3b2a1c-...",
   "latency_ms": 12.45
 }
-```
-
----
-
-## 🛡️ License
-
-Distributed under the MIT License. See `LICENSE` for more information.
+`
