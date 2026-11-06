@@ -34,7 +34,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } catch {
           // Token is expired or invalid
           localStorage.removeItem('auth_token')
-          localStorage.removeItem('auth_user')
           setToken(null)
           setUser(null)
         }

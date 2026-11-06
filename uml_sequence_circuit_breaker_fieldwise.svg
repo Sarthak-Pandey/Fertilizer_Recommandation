@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="2200" height="1500" viewBox="0 0 2200 1500">
+  <defs>
+    <filter id="shadow2" x="-3%" y="-3%" width="106%" height="106%">
+      <feDropShadow dx="2" dy="4" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.08"/>
+    </filter>
+    
+    <marker id="sync-arrow2" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <polygon points="0,1 10,5 0,9" fill="#1E293B"/>
+    </marker>
+
+    <marker id="return-arrow2" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9" fill="none" stroke="#475569" stroke-width="1.8" stroke-linecap="round"/>
+    </marker>
+
+    <marker id="fail-x" viewBox="0 0 12 12" refX="6" refY="6" markerWidth="10" markerHeight="10" orient="auto">
+      <path d="M 2 2 L 10 10 M 10 2 L 2 10" stroke="#DC2626" stroke-width="2.5" stroke-linecap="round"/>
+    </marker>
+
+    <marker id="self-arrow2" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <polygon points="0,1 10,5 0,9" fill="#1E293B"/>
+    </marker>
+  </defs>
+
+  <style>
+    .title-main { font-family: 'Segoe UI', Arial, sans-serif; font-size: 26px; font-weight: bold; fill: #0f172a; }
+    .title-sub  { font-family: 'Segoe UI', Arial, sans-serif; font-size: 13.5px; font-weight: 500; fill: #475569; }
+    
+    .lifeline-name { font-family: 'Segoe UI', Arial, sans-serif; font-size: 13.5px; font-weight: bold; text-anchor: middle; }
+    .lifeline-sub  { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; font-style: italic; text-anchor: middle; fill: #64748B; }
+    .lifeline-line { stroke: #94A3B8; stroke-width: 1.5px; stroke-dasharray: 6,6; }
+    
+    .act-bar { fill: #E2E8F0; stroke: #475569; stroke-width: 1.2px; rx: 3px; }
+    .act-bar-focus { fill: #BAE6FD; stroke: #0284C7; stroke-width: 1.4px; rx: 3px; }
+    .act-bar-warn  { fill: #FED7AA; stroke: #EA580C; stroke-width: 1.4px; rx: 3px; }
+    .act-bar-err   { fill: #FECACA; stroke: #DC2626; stroke-width: 1.4px; rx: 3px; }
+
+    .msg-sync   { stroke: #1E293B; stroke-width: 1.8px; marker-end: url(#sync-arrow2); }
+    .msg-return { stroke: #475569; stroke-width: 1.6px; stroke-dasharray: 6,4; marker-end: url(#return-arrow2); }
+    .msg-fail   { stroke: #DC2626; stroke-width: 1.8px; stroke-dasharray: 4,4; marker-end: url(#fail-x); }
+    
+    .msg-text { font-family: 'Consolas', 'Segoe UI', monospace; font-size: 11px; fill: #0F172A; font-weight: 600; }
+    .msg-ret-text { font-family: 'Consolas', 'Segoe UI', monospace; font-size: 10.5px; fill: #475569; font-style: italic; }
+    .msg-err-text { font-family: 'Consolas', 'Segoe UI', monospace; font-size: 11px; fill: #DC2626; font-weight: bold; }
+
+    .frame-box { fill: #F8FAFC; fill-opacity: 0.65; stroke: #64748B; stroke-width: 1.5px; rx: 5px; }
+    .frame-tag { fill: #334155; rx: 3px; }
+    .frame-tag-text { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; font-weight: bold; fill: #FFFFFF; }
+    .frame-guard { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11.5px; font-weight: bold; fill: #1E3A8A; }
+    .frame-divider { stroke: #64748B; stroke-width: 1.2px; stroke-dasharray: 8,6; }
+    
+    .state-badge { rx: 4px; stroke-width: 1.2px; }
+    .state-text  { font-family: 'Segoe UI', Arial, sans-serif; font-size: 10.5px; font-weight: bold; text-anchor: middle; }
+
+    .legend-box { fill: #F1F5F9; stroke: #CBD5E1; stroke-width: 1px; rx: 6px; }
+    .legend-text { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; fill: #334155; }
+  </style>
+
+  <!-- Background -->
+  <rect width="2200" height="1500" fill="#FFFFFF"/>
+  <rect x="15" y="15" width="2170" height="1470" fill="none" stroke="#E2E8F0" stroke-width="2" rx="10"/>
+
+  <!-- Header Banner -->
+  <g transform="translate(1100.0, 42)">
+    <text class="title-main" text-anchor="middle">Fieldwise: Fault Tolerance &amp; Resiliency Modeling</text>
+    <text class="title-sub" y="24" text-anchor="middle">UML 2.5 Sequence Diagram 2: Exponential Backoff Retries, Circuit Breaker Tripping &amp; Half-Open Probe Recovery</text>
+  </g>
+
+  <!-- Lifeline 1: Client -->
+  <g transform="translate(200, 95)">
+    <rect x="-90" y="0" width="180" height="52" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1.8" rx="6" filter="url(#shadow2)"/>
+    <text y="22" class="lifeline-name" fill="#1E3A8A">:Client / Farmer</text>
+    <text y="38" class="lifeline-sub">&lt;&lt;Actor / Mobile or Web&gt;&gt;</text>
+    <line x1="0" y1="52" x2="0" y2="1330" class="lifeline-line"/>
+  </g>
+
+  <!-- Lifeline 2: RecommendationController -->
+  <g transform="translate(560, 95)">
+    <rect x="-110" y="0" width="220" height="52" fill="#ECFDF5" stroke="#10B981" stroke-width="1.8" rx="6" filter="url(#shadow2)"/>
+    <text y="22" class="lifeline-name" fill="#065F46">:RecommendationController</text>
+    <text y="38" class="lifeline-sub">&lt;&lt;Boundary / REST Controller&gt;&gt;</text>
+    <line x1="0" y1="52" x2="0" y2="1330" class="lifeline-line"/>
+  </g>
+
+  <!-- Lifeline 3: MLClient -->
+  <g transform="translate(960, 95)">
+    <rect x="-95" y="0" width="190" height="52" fill="#EEF2FF" stroke="#6366F1" stroke-width="1.8" rx="6" filter="url(#shadow2)"/>
+    <text y="22" class="lifeline-name" fill="#312E81">:MLClient</text>
+    <text y="38" class="lifeline-sub">&lt;&lt;Service / Resilient Adapter&gt;&gt;</text>
+    <line x1="0" y1="52" x2="0" y2="1330" class="lifeline-line"/>
+  </g>
+
+  <!-- Lifeline 4: CircuitBreaker -->
+  <g transform="translate(1360, 95)">
+    <rect x="-105" y="0" width="210" height="52" fill="#FFFBEB" stroke="#F59E0B" stroke-width="1.8" rx="6" filter="url(#shadow2)"/>
+    <text y="22" class="lifeline-name" fill="#78350F">:CircuitBreaker</text>
+    <text y="38" class="lifeline-sub">&lt;&lt;FSM / State Monitor&gt;&gt;</text>
+    <line x1="0" y1="52" x2="0" y2="1330" class="lifeline-line"/>
+  </g>
+
+  <!-- Lifeline 5: FertilizerPredictor (Degraded) -->
+  <g transform="translate(1760, 95)">
+    <rect x="-115" y="0" width="230" height="52" fill="#FEF2F2" stroke="#EF4444" stroke-width="1.8" rx="6" filter="url(#shadow2)"/>
+    <text y="22" class="lifeline-name" fill="#991B1B">:FertilizerPredictor</text>
+    <text y="38" class="lifeline-sub">&lt;&lt;ML Service Engine (Failing)&gt;&gt;</text>
+    <line x1="0" y1="52" x2="0" y2="1330" class="lifeline-line"/>
+  </g>
+
+  <!-- Lifeline 6: DatabaseManager -->
+  <g transform="translate(2020, 95)">
+    <rect x="-85" y="0" width="170" height="52" fill="#F0FDFA" stroke="#0D9488" stroke-width="1.8" rx="6" filter="url(#shadow2)"/>
+    <text y="22" class="lifeline-name" fill="#134E4A">:DatabaseManager</text>
+    <text y="38" class="lifeline-sub">&lt;&lt;Data Access / Peewee&gt;&gt;</text>
+    <line x1="0" y1="52" x2="0" y2="1330" class="lifeline-line"/>
+  </g>
+
+  <!-- Initial State Badge: CLOSED -->
+  <g transform="translate(1360, 160)">
+    <rect x="-45" y="0" width="90" height="20" fill="#DCFCE7" stroke="#16A34A" class="state-badge"/>
+    <text y="14" class="state-text" fill="#15803D">State: CLOSED</text>
+  </g>
+
+  <!-- Phase 1: Retries & Tripping -->
+  <line x1="200" y1="195" x2="553" y2="195" class="msg-sync"/>
+  <text x="220" y="188" class="msg-text">1: POST /api/v1/fertilizer/recommend (Soil_pH=6.5, N=120, P=45, K=60)</text>
+
+  <rect x="553" y="195" width="14" height="420" class="act-bar"/>
+  <line x1="567" y1="215" x2="953" y2="215" class="msg-sync"/>
+  <text x="580" y="208" class="msg-text">2: predict(ml_payload)</text>
+
+  <rect x="953" y="215" width="14" height="380" class="act-bar-warn"/>
+
+  <line x1="967" y1="235" x2="1353" y2="235" class="msg-sync"/>
+  <text x="980" y="228" class="msg-text">3: can_execute()</text>
+
+  <rect x="1353" y="235" width="14" height="30" class="act-bar"/>
+  <line x1="1353" y1="260" x2="967" y2="260" class="msg-return"/>
+  <text x="1000" y="253" class="msg-ret-text">4: return True [State == CLOSED, failure_count = 4]</text>
+
+  <rect x="900" y="280" width="940" height="190" class="frame-box"/>
+  <rect x="900" y="280" width="45" height="20" class="frame-tag"/>
+  <text x="908" y="295" class="frame-tag-text">loop</text>
+  <text x="955" y="296" class="frame-guard">[attempt = 1 to 3, max_retries = 3]</text>
+
+  <line x1="967" y1="315" x2="1750" y2="315" class="msg-fail"/>
+  <text x="980" y="308" class="msg-err-text">5a: POST /predict (attempt 1) -> httpx.ConnectError / Timeout (10.0s)</text>
+
+  <path d="M 967 330 L 1005 330 L 1005 350 L 967 350" fill="none" stroke="#EA580C" stroke-width="1.4" marker-end="url(#self-arrow2)"/>
+  <text x="1015" y="344" class="msg-text" style="fill:#EA580C;">sleep(base_delay * 2^0 = 0.5s + jitter)</text>
+
+  <line x1="967" y1="375" x2="1750" y2="375" class="msg-fail"/>
+  <text x="980" y="368" class="msg-err-text">5b: POST /predict (attempt 2) -> HTTP 504 Gateway Timeout</text>
+
+  <path d="M 967 390 L 1005 390 L 1005 410 L 967 410" fill="none" stroke="#EA580C" stroke-width="1.4" marker-end="url(#self-arrow2)"/>
+  <text x="1015" y="404" class="msg-text" style="fill:#EA580C;">sleep(base_delay * 2^1 = 1.0s + jitter)</text>
+
+  <line x1="967" y1="435" x2="1750" y2="435" class="msg-fail"/>
+  <text x="980" y="428" class="msg-err-text">5c: POST /predict (attempt 3) -> Connection Refused / Service Unreachable</text>
+
+  <line x1="967" y1="490" x2="1353" y2="490" class="msg-sync"/>
+  <text x="980" y="483" class="msg-text">6: record_failure()</text>
+
+  <rect x="1353" y="490" width="14" height="65" class="act-bar-err"/>
+  
+  <path d="M 1367 505 L 1410 505 L 1410 535 L 1367 535" fill="none" stroke="#DC2626" stroke-width="1.6" marker-end="url(#self-arrow2)"/>
+  <text x="1420" y="518" class="msg-err-text">failure_count (5) >= threshold (5)</text>
+  <text x="1420" y="534" class="msg-err-text">transitionState(CLOSED ➔ OPEN)</text>
+
+  <g transform="translate(1360, 565)">
+    <rect x="-40" y="0" width="80" height="20" fill="#FEE2E2" stroke="#DC2626" class="state-badge"/>
+    <text y="14" class="state-text" fill="#B91C1C">State: OPEN</text>
+  </g>
+
+  <line x1="953" y1="585" x2="567" y2="585" class="msg-return" style="stroke:#DC2626;"/>
+  <text x="590" y="578" class="msg-err-text">7: raise MLServiceError("ML service unavailable", status_code=503)</text>
+
+  <line x1="567" y1="605" x2="2013" y2="605" class="msg-sync"/>
+  <text x="580" y="598" class="msg-text">8: log_prediction(features, predicted="N/A", status="error", error_message="MLServiceError: 503")</text>
+
+  <line x1="553" y1="625" x2="200" y2="625" class="msg-return" style="stroke:#DC2626;"/>
+  <text x="220" y="618" class="msg-err-text">9: HTTP 503 Service Unavailable (Fallback Agronomic Advisory)</text>
+
+  <!-- Phase 2: Fast Fail -->
+  <g transform="translate(1100, 670)">
+    <rect x="-450" y="0" width="900" height="28" fill="#FEF3C7" stroke="#F59E0B" rx="5"/>
+    <text y="19" class="msg-text" text-anchor="middle" style="fill:#B45309; font-size:12px;">TIME ADVANCES: Subsequent Request arrives while Circuit is OPEN (within 30s Cooldown)</text>
+  </g>
+
+  <line x1="200" y1="720" x2="553" y2="720" class="msg-sync"/>
+  <text x="220" y="713" class="msg-text">10: POST /api/v1/fertilizer/recommend (Soil_pH=7.1, N=80, P=30, K=40)</text>
+
+  <rect x="553" y="720" width="14" height="150" class="act-bar"/>
+  <line x1="567" y1="740" x2="953" y2="740" class="msg-sync"/>
+  <text x="580" y="733" class="msg-text">11: predict(ml_payload)</text>
+
+  <rect x="953" y="740" width="14" height="110" class="act-bar"/>
+  <line x1="967" y1="760" x2="1353" y2="760" class="msg-sync"/>
+  <text x="980" y="753" class="msg-text">12: can_execute()</text>
+
+  <rect x="1353" y="760" width="14" height="40" class="act-bar-err"/>
+  <path d="M 1367 770 L 1400 770 L 1400 790 L 1367 790" fill="none" stroke="#DC2626" stroke-width="1.4" marker-end="url(#self-arrow2)"/>
+  <text x="1410" y="784" class="msg-err-text">elapsed (12.4s) &lt; cooldown (30.0s)</text>
+
+  <line x1="1353" y1="805" x2="967" y2="805" class="msg-return" style="stroke:#DC2626;"/>
+  <text x="1000" y="798" class="msg-err-text">13: return False [State == OPEN]</text>
+
+  <line x1="953" y1="835" x2="567" y2="835" class="msg-return" style="stroke:#DC2626;"/>
+  <text x="580" y="828" class="msg-err-text">14: fast-fail: raise MLServiceError("Circuit is OPEN", status_code=503) [Latency &lt; 2ms]</text>
+
+  <line x1="553" y1="865" x2="200" y2="865" class="msg-return" style="stroke:#DC2626;"/>
+  <text x="220" y="858" class="msg-err-text">15: HTTP 503 (Fast-Fail Response: Downstream Service Isolated)</text>
+
+  <!-- Phase 3: Cooldown & Recovery -->
+  <g transform="translate(1100, 915)">
+    <rect x="-450" y="0" width="900" height="28" fill="#E0F2FE" stroke="#0284C7" rx="5"/>
+    <text y="19" class="msg-text" text-anchor="middle" style="fill:#0369A1; font-size:12px;">TIME ADVANCES: 31 seconds pass (Cooldown expired: elapsed &gt;= 30.0s)</text>
+  </g>
+
+  <line x1="200" y1="965" x2="553" y2="965" class="msg-sync"/>
+  <text x="220" y="958" class="msg-text">16: POST /api/v1/fertilizer/recommend (Soil_pH=6.8, N=110, P=40, K=55)</text>
+
+  <rect x="553" y="965" width="14" height="320" class="act-bar-focus"/>
+  <line x1="567" y1="985" x2="953" y2="985" class="msg-sync"/>
+  <text x="580" y="978" class="msg-text">17: predict(ml_payload)</text>
+
+  <rect x="953" y="985" width="14" height="275" class="act-bar"/>
+  <line x1="967" y1="1005" x2="1353" y2="1005" class="msg-sync"/>
+  <text x="980" y="998" class="msg-text">18: can_execute()</text>
+
+  <rect x="1353" y="1005" width="14" height="55" class="act-bar-warn"/>
+  <path d="M 1367 1015 L 1405 1015 L 1405 1040 L 1367 1040" fill="none" stroke="#D97706" stroke-width="1.5" marker-end="url(#self-arrow2)"/>
+  <text x="1415" y="1026" class="msg-text" style="fill:#D97706;">elapsed (31.2s) &gt;= cooldown (30.0s)</text>
+  <text x="1415" y="1042" class="msg-text" style="fill:#D97706;">transitionState(OPEN ➔ HALF_OPEN)</text>
+
+  <line x1="1353" y1="1060" x2="967" y2="1060" class="msg-return"/>
+  <text x="990" y="1053" class="msg-ret-text">19: return True (Trial Probe Request Allowed)</text>
+
+  <g transform="translate(1360, 1075)">
+    <rect x="-55" y="0" width="110" height="20" fill="#FEF3C7" stroke="#D97706" class="state-badge"/>
+    <text y="14" class="state-text" fill="#92400E">State: HALF_OPEN</text>
+  </g>
+
+  <line x1="967" y1="1115" x2="1753" y2="1115" class="msg-sync"/>
+  <text x="980" y="1108" class="msg-text" style="fill:#065F46;">20: Trial Probe: POST /predict (Downstream Service Restored)</text>
+
+  <rect x="1753" y="1115" width="14" height="40" class="act-bar"/>
+  <line x1="1753" y1="1145" x2="967" y2="1145" class="msg-return" style="stroke:#16A34A;"/>
+  <text x="990" y="1138" class="msg-ret-text" style="fill:#16A34A; font-weight:bold;">21: HTTP 200 OK {'fertilizer':'Urea', 'confidence':0.965}</text>
+
+  <line x1="967" y1="1180" x2="1353" y2="1180" class="msg-sync"/>
+  <text x="980" y="1173" class="msg-text">22: record_success()</text>
+
+  <rect x="1353" y="1180" width="14" height="45" class="act-bar"/>
+  <path d="M 1367 1190 L 1405 1190 L 1405 1210 L 1367 1210" fill="none" stroke="#16A34A" stroke-width="1.5" marker-end="url(#self-arrow2)"/>
+  <text x="1415" y="1204" class="msg-text" style="fill:#16A34A;">failure_count = 0; transitionState(HALF_OPEN ➔ CLOSED)</text>
+
+  <g transform="translate(1360, 1235)">
+    <rect x="-45" y="0" width="90" height="20" fill="#DCFCE7" stroke="#16A34A" class="state-badge"/>
+    <text y="14" class="state-text" fill="#15803D">State: CLOSED</text>
+  </g>
+
+  <line x1="953" y1="1235" x2="567" y2="1235" class="msg-return"/>
+  <text x="600" y="1228" class="msg-ret-text">23: return ml_result (Service fully operational)</text>
+
+  <line x1="553" y1="1265" x2="200" y2="1265" class="msg-return" style="stroke:#16A34A;"/>
+  <text x="220" y="1258" class="msg-ret-text" style="font-weight:bold; fill:#065F46;">24: HTTP 200 OK RecommendResponse(success=True, fertilizer="Urea", confidence=0.965)</text>
+
+  <!-- Bottom Timeline -->
+  <g transform="translate(200, 1350)"><rect x="-70" y="0" width="140" height="26" fill="#F8FAFC" stroke="#94A3B8" rx="4"/><text y="18" class="lifeline-name" fill="#475569" style="font-size:11px;">Client / Farmer</text></g>
+  <g transform="translate(560, 1350)"><rect x="-80" y="0" width="160" height="26" fill="#F8FAFC" stroke="#94A3B8" rx="4"/><text y="18" class="lifeline-name" fill="#475569" style="font-size:11px;">RecommendationCtrl</text></g>
+  <g transform="translate(960, 1350)"><rect x="-60" y="0" width="120" height="26" fill="#F8FAFC" stroke="#94A3B8" rx="4"/><text y="18" class="lifeline-name" fill="#475569" style="font-size:11px;">MLClient</text></g>
+  <g transform="translate(1360, 1350)"><rect x="-65" y="0" width="130" height="26" fill="#F8FAFC" stroke="#94A3B8" rx="4"/><text y="18" class="lifeline-name" fill="#475569" style="font-size:11px;">CircuitBreaker</text></g>
+  <g transform="translate(1760, 1350)"><rect x="-75" y="0" width="150" height="26" fill="#F8FAFC" stroke="#94A3B8" rx="4"/><text y="18" class="lifeline-name" fill="#475569" style="font-size:11px;">FertilizerPredictor</text></g>
+  <g transform="translate(2020, 1350)"><rect x="-70" y="0" width="140" height="26" fill="#F8FAFC" stroke="#94A3B8" rx="4"/><text y="18" class="lifeline-name" fill="#475569" style="font-size:11px;">DatabaseManager</text></g>
+
+  <!-- Legend -->
+  <g transform="translate(60, 1410)">
+    <rect width="2080" height="55" class="legend-box"/>
+    <text x="20" y="24" class="legend-text" font-weight="bold">Resiliency States &amp; Notations:</text>
+    <rect x="230" y="10" width="80" height="20" fill="#DCFCE7" stroke="#16A34A" class="state-badge"/>
+    <text x="270" y="24" class="state-text" fill="#15803D">CLOSED (Normal)</text>
+    <rect x="420" y="10" width="80" height="20" fill="#FEE2E2" stroke="#DC2626" class="state-badge"/>
+    <text x="460" y="24" class="state-text" fill="#B91C1C">OPEN (Tripped)</text>
+    <rect x="610" y="10" width="95" height="20" fill="#FEF3C7" stroke="#D97706" class="state-badge"/>
+    <text x="657" y="24" class="state-text" fill="#92400E">HALF_OPEN (Probe)</text>
+    <line x1="820" y1="20" x2="860" y2="20" class="msg-fail"/>
+    <text x="870" y="24" class="legend-text">Failed Invocations (Timeout / Refused)</text>
+    <rect x="1160" y="8" width="40" height="24" class="frame-box"/>
+    <text x="1165" y="24" class="legend-text" font-weight="bold">loop</text>
+    <text x="1210" y="24" class="legend-text">Exponential Backoff Iteration Loop</text>
+    <text x="1560" y="24" class="legend-text" font-style="italic">Failure Threshold: 5 | Cooldown: 30.0s | Max Retries: 3 (0.5s, 1.0s, 2.0s)</text>
+  </g>
+</svg>
