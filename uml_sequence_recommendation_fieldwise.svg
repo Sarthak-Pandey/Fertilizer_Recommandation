@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="2200" height="1400" viewBox="0 0 2200 1400">
+  <defs>
+    <filter id="shadow" x="-3%" y="-3%" width="106%" height="106%">
+      <feDropShadow dx="2" dy="4" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.08"/>
+    </filter>
+    
+    <marker id="sync-arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <polygon points="0,1 10,5 0,9" fill="#1E293B"/>
+    </marker>
+
+    <marker id="async-arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9" fill="none" stroke="#2563EB" stroke-width="1.8" stroke-linecap="round"/>
+    </marker>
+
+    <marker id="return-arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9" fill="none" stroke="#475569" stroke-width="1.8" stroke-linecap="round"/>
+    </marker>
+
+    <marker id="self-arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <polygon points="0,1 10,5 0,9" fill="#1E293B"/>
+    </marker>
+  </defs>
+
+  <style>
+    .title-main { font-family: 'Segoe UI', Arial, sans-serif; font-size: 26px; font-weight: bold; fill: #0f172a; }
+    .title-sub  { font-family: 'Segoe UI', Arial, sans-serif; font-size: 13.5px; font-weight: 500; fill: #475569; }
+    
+    .lifeline-name { font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; font-weight: bold; text-anchor: middle; }
+    .lifeline-sub  { font-family: 'Segoe UI', Arial, sans-serif; font-size: 10.5px; font-style: italic; text-anchor: middle; fill: #64748B; }
+    .lifeline-line { stroke: #94A3B8; stroke-width: 1.5px; stroke-dasharray: 6,6; }
+    
+    .act-bar { fill: #E2E8F0; stroke: #475569; stroke-width: 1.2px; rx: 3px; }
+    .act-bar-focus { fill: #BAE6FD; stroke: #0284C7; stroke-width: 1.4px; rx: 3px; }
+    
+    .msg-sync   { stroke: #1E293B; stroke-width: 1.8px; marker-end: url(#sync-arrow); }
+    .msg-async  { stroke: #2563EB; stroke-width: 1.8px; marker-end: url(#async-arrow); }
+    .msg-return { stroke: #475569; stroke-width: 1.6px; stroke-dasharray: 6,4; marker-end: url(#return-arrow); }
+    
+    .msg-text { font-family: 'Consolas', 'Segoe UI', monospace; font-size: 11px; fill: #0F172A; font-weight: 600; }
+    .msg-ret-text { font-family: 'Consolas', 'Segoe UI', monospace; font-size: 10.5px; fill: #475569; font-style: italic; }
+    
+    .frame-box { fill: #F8FAFC; fill-opacity: 0.6; stroke: #64748B; stroke-width: 1.5px; rx: 5px; }
+    .frame-tag { fill: #334155; rx: 3px; }
+    .frame-tag-text { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; font-weight: bold; fill: #FFFFFF; }
+    .frame-guard { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11.5px; font-weight: bold; fill: #1E3A8A; }
+    .frame-divider { stroke: #64748B; stroke-width: 1.2px; stroke-dasharray: 8,6; }
+
+    .legend-box { fill: #F1F5F9; stroke: #CBD5E1; stroke-width: 1px; rx: 6px; }
+    .legend-text { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; fill: #334155; }
+  </style>
+
+  <!-- Background -->
+  <rect width="2200" height="1400" fill="#FFFFFF"/>
+  <rect x="15" y="15" width="2170" height="1370" fill="none" stroke="#E2E8F0" stroke-width="2" rx="10"/>
+
+  <!-- Header Banner -->
+  <g transform="translate(1100.0, 42)">
+    <text class="title-main" text-anchor="middle">Fieldwise: Intelligent Fertilizer Recommendation System</text>
+    <text class="title-sub" y="24" text-anchor="middle">UML 2.5 Sequence Diagram 1: Real-Time Fertilizer Recommendation &amp; Inference Pipeline Interaction</text>
+  </g>
+
+  <!-- Lifeline 1: Farmer / Client UI -->
+  <g transform="translate(160, 90)">
+    <rect x="-90" y="0" width="180" height="52" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1.8" rx="6" filter="url(#shadow)"/>
+    <text y="22" class="lifeline-name" fill="#1E3A8A">:Farmer / Client</text>
+    <text y="38" class="lifeline-sub">&lt;&lt;Actor / Web UI&gt;&gt;</text>
+    <line x1="0" y1="52" x2="0" y2="1240" class="lifeline-line"/>
+  </g>
+
+  <!-- Lifeline 2: RecommendationController -->
+  <g transform="translate(430, 90)">
+    <rect x="-105" y="0" width="210" height="52" fill="#ECFDF5" stroke="#10B981" stroke-width="1.8" rx="6" filter="url(#shadow)"/>
+    <text y="22" class="lifeline-name" fill="#065F46">:RecommendationController</text>
+    <text y="38" class="lifeline-sub">&lt;&lt;Boundary / API Router&gt;&gt;</text>
+    <line x1="0" y1="52" x2="0" y2="1240" class="lifeline-line"/>
+  </g>
+
+  <!-- Lifeline 3: MLClient -->
+  <g transform="translate(720, 90)">
+    <rect x="-85" y="0" width="170" height="52" fill="#EEF2FF" stroke="#6366F1" stroke-width="1.8" rx="6" filter="url(#shadow)"/>
+    <text y="22" class="lifeline-name" fill="#312E81">:MLClient</text>
+    <text y="38" class="lifeline-sub">&lt;&lt;Service / HTTP Adapter&gt;&gt;</text>
+    <line x1="0" y1="52" x2="0" y2="1240" class="lifeline-line"/>
+  </g>
+
+  <!-- Lifeline 4: CircuitBreaker -->
+  <g transform="translate(1000, 90)">
+    <rect x="-85" y="0" width="170" height="52" fill="#FFFBEB" stroke="#F59E0B" stroke-width="1.8" rx="6" filter="url(#shadow)"/>
+    <text y="22" class="lifeline-name" fill="#78350F">:CircuitBreaker</text>
+    <text y="38" class="lifeline-sub">&lt;&lt;FSM / Resiliency Guard&gt;&gt;</text>
+    <line x1="0" y1="52" x2="0" y2="1240" class="lifeline-line"/>
+  </g>
+
+  <!-- Lifeline 5: FertilizerPredictor -->
+  <g transform="translate(1290, 90)">
+    <rect x="-100" y="0" width="200" height="52" fill="#F5F3FF" stroke="#8B5CF6" stroke-width="1.8" rx="6" filter="url(#shadow)"/>
+    <text y="22" class="lifeline-name" fill="#4C1D95">:FertilizerPredictor</text>
+    <text y="38" class="lifeline-sub">&lt;&lt;ML Service Engine :8001&gt;&gt;</text>
+    <line x1="0" y1="52" x2="0" y2="1240" class="lifeline-line"/>
+  </g>
+
+  <!-- Lifeline 6: ModelRegistry -->
+  <g transform="translate(1570, 90)">
+    <rect x="-85" y="0" width="170" height="52" fill="#FDF2F8" stroke="#EC4899" stroke-width="1.8" rx="6" filter="url(#shadow)"/>
+    <text y="22" class="lifeline-name" fill="#831843">:ModelRegistry</text>
+    <text y="38" class="lifeline-sub">&lt;&lt;Cache / Artifact Manager&gt;&gt;</text>
+    <line x1="0" y1="52" x2="0" y2="1240" class="lifeline-line"/>
+  </g>
+
+  <!-- Lifeline 7: DatabaseManager -->
+  <g transform="translate(1840, 90)">
+    <rect x="-90" y="0" width="180" height="52" fill="#F0FDFA" stroke="#0D9488" stroke-width="1.8" rx="6" filter="url(#shadow)"/>
+    <text y="22" class="lifeline-name" fill="#134E4A">:DatabaseManager</text>
+    <text y="38" class="lifeline-sub">&lt;&lt;Data Access / Peewee ORM&gt;&gt;</text>
+    <line x1="0" y1="52" x2="0" y2="1240" class="lifeline-line"/>
+  </g>
+
+  <!-- Lifeline 8: PrometheusMetrics -->
+  <g transform="translate(2060, 90)">
+    <rect x="-80" y="0" width="160" height="52" fill="#FEF2F2" stroke="#EF4444" stroke-width="1.8" rx="6" filter="url(#shadow)"/>
+    <text y="22" class="lifeline-name" fill="#7F1D1D">:PrometheusMetrics</text>
+    <text y="38" class="lifeline-sub">&lt;&lt;Observability Exporter&gt;&gt;</text>
+    <line x1="0" y1="52" x2="0" y2="1240" class="lifeline-line"/>
+  </g>
+
+  <!-- Activation Bars -->
+  <rect x="153" y="170" width="14" height="1030" class="act-bar"/>
+  <rect x="423" y="185" width="14" height="990" class="act-bar-focus"/>
+  <rect x="713" y="325" width="14" height="570" class="act-bar"/>
+  <rect x="993" y="355" width="14" height="60" class="act-bar"/>
+  <rect x="993" y="835" width="14" height="45" class="act-bar"/>
+  <rect x="1283" y="475" width="14" height="310" class="act-bar-focus"/>
+  <rect x="1563" y="505" width="14" height="50" class="act-bar"/>
+  <rect x="1833" y="945" width="14" height="75" class="act-bar"/>
+  <rect x="2053" y="1040" width="14" height="50" class="act-bar"/>
+
+  <!-- Messages -->
+  <line x1="167" y1="185" x2="423" y2="185" class="msg-sync"/>
+  <text x="180" y="177" class="msg-text">1: POST /api/v1/fertilizer/recommend (soil_pH, N, P, K, crop_stage)</text>
+
+  <path d="M 437 205 L 475 205 L 475 235 L 437 235" fill="none" stroke="#1E293B" stroke-width="1.6" marker-end="url(#self-arrow)"/>
+  <text x="485" y="224" class="msg-text">2: validate_finite_and_ranges(request: RecommendRequest)</text>
+
+  <rect x="110" y="250" width="410" height="70" class="frame-box"/>
+  <rect x="110" y="250" width="40" height="20" class="frame-tag"/>
+  <text x="118" y="265" class="frame-tag-text">alt</text>
+  <text x="160" y="266" class="frame-guard">[Soil_pH &lt; 0 or &gt; 14 or N,P,K &lt; 0]</text>
+  <line x1="423" y1="295" x2="167" y2="295" class="msg-return"/>
+  <text x="195" y="289" class="msg-ret-text">3: HTTP 422 Unprocessable Entity (ValidationError)</text>
+
+  <line x1="437" y1="335" x2="713" y2="335" class="msg-sync"/>
+  <text x="450" y="328" class="msg-text">4: predict(ml_payload: dict)</text>
+
+  <line x1="727" y1="365" x2="993" y2="365" class="msg-sync"/>
+  <text x="740" y="358" class="msg-text">5: can_execute()</text>
+
+  <path d="M 1007 375 L 1040 375 L 1040 395 L 1007 395" fill="none" stroke="#1E293B" stroke-width="1.5" marker-end="url(#self-arrow)"/>
+  <text x="1050" y="389" class="msg-text" style="font-size: 10px;">async with self._lock: state == CLOSED</text>
+
+  <line x1="993" y1="410" x2="727" y2="410" class="msg-return"/>
+  <text x="780" y="403" class="msg-ret-text">6: return True (Execution permitted)</text>
+
+  <path d="M 727 430 L 760 430 L 760 450 L 727 450" fill="none" stroke="#1E293B" stroke-width="1.5" marker-end="url(#self-arrow)"/>
+  <text x="770" y="444" class="msg-text">7: _get_client(): httpx.AsyncClient (pool)</text>
+
+  <line x1="727" y1="475" x2="1283" y2="475" class="msg-sync"/>
+  <text x="740" y="468" class="msg-text">8: async POST /predict (JSON: Soil_pH, N, P, K, Crop_Growth_Stage)</text>
+
+  <line x1="1297" y1="510" x2="1563" y2="510" class="msg-sync"/>
+  <text x="1310" y="503" class="msg-text">9: load_bundle(version=None)</text>
+
+  <line x1="1563" y1="545" x2="1297" y2="545" class="msg-return"/>
+  <text x="1320" y="538" class="msg-ret-text">10: return ModelBundle(pipeline, label_encoder, metadata)</text>
+
+  <path d="M 1297 565 L 1335 565 L 1335 590 L 1297 590" fill="none" stroke="#1E293B" stroke-width="1.5" marker-end="url(#self-arrow)"/>
+  <text x="1345" y="582" class="msg-text">11: df_input = pd.DataFrame(ordered_features)</text>
+
+  <path d="M 1297 605 L 1335 605 L 1335 630 L 1297 630" fill="none" stroke="#1E293B" stroke-width="1.5" marker-end="url(#self-arrow)"/>
+  <text x="1345" y="622" class="msg-text">12: raw_pred = bundle.pipeline.predict(df_input) -> [3]</text>
+
+  <path d="M 1297 645 L 1335 645 L 1335 670 L 1297 670" fill="none" stroke="#1E293B" stroke-width="1.5" marker-end="url(#self-arrow)"/>
+  <text x="1345" y="662" class="msg-text">13: label = bundle.label_encoder.inverse_transform([3]) -> "DAP"</text>
+
+  <path d="M 1297 685 L 1335 685 L 1335 710 L 1297 710" fill="none" stroke="#1E293B" stroke-width="1.5" marker-end="url(#self-arrow)"/>
+  <text x="1345" y="702" class="msg-text">14: probas = bundle.pipeline.predict_proba(df_input) -> confidence: 0.942</text>
+
+  <line x1="1283" y1="765" x2="727" y2="765" class="msg-return"/>
+  <text x="750" y="758" class="msg-ret-text">15: HTTP 200 OK {'fertilizer':'DAP', 'confidence':0.942, 'model_version':'v1.0.0', 'probabilities':{..}}</text>
+
+  <line x1="727" y1="835" x2="993" y2="835" class="msg-sync"/>
+  <text x="740" y="828" class="msg-text">16: record_success()</text>
+
+  <path d="M 1007 845 L 1035 845 L 1035 865 L 1007 865" fill="none" stroke="#1E293B" stroke-width="1.4" marker-end="url(#self-arrow)"/>
+  <text x="1045" y="859" class="msg-text" style="font-size: 10px;">failure_count = 0; state = CLOSED</text>
+
+  <line x1="713" y1="895" x2="437" y2="895" class="msg-return"/>
+  <text x="460" y="888" class="msg-ret-text">17: return ml_result dict (latency_ms = 38.4ms)</text>
+
+  <rect x="370" y="920" width="1760" height="195" class="frame-box"/>
+  <rect x="370" y="920" width="40" height="20" class="frame-tag"/>
+  <text x="378" y="935" class="frame-tag-text">par</text>
+  <text x="420" y="936" class="frame-guard">[Parallel Execution: Database Persistence &amp; Metrics Telemetry]</text>
+
+  <line x1="437" y1="960" x2="1833" y2="960" class="msg-sync"/>
+  <text x="450" y="953" class="msg-text">18a: log_prediction(input_features, "DAP", confidence=0.942, latency_ms=38.4, status="success")</text>
+
+  <path d="M 1847 975 L 1880 975 L 1880 1000 L 1847 1000" fill="none" stroke="#1E293B" stroke-width="1.5" marker-end="url(#self-arrow)"/>
+  <text x="1890" y="992" class="msg-text">PredictionRecord.create() -> SQL INSERT</text>
+
+  <line x1="1833" y1="1015" x2="437" y2="1015" class="msg-return"/>
+  <text x="470" y="1008" class="msg-ret-text">18b: return prediction_id = "pred_a8f9c2e4"</text>
+
+  <line x1="370" y1="1035" x2="2130" y2="1035" class="frame-divider"/>
+
+  <line x1="437" y1="1065" x2="2053" y2="1065" class="msg-async"/>
+  <text x="450" y="1058" class="msg-text" style="fill:#2563EB;">19: record_prediction(status="success", fertilizer="DAP", latency_ms=38.4)</text>
+
+  <line x1="423" y1="1145" x2="167" y2="1145" class="msg-return"/>
+  <text x="185" y="1138" class="msg-ret-text" style="font-weight: bold; fill: #065F46;">20: HTTP 200 OK RecommendResponse(success=True, fertilizer="DAP", confidence=0.942, prediction_id="pred_a8f9c2e4")</text>
+
+  <path d="M 167 1165 L 210 1165 L 210 1195 L 167 1195" fill="none" stroke="#1E293B" stroke-width="1.6" marker-end="url(#self-arrow)"/>
+  <text x="220" y="1184" class="msg-text">21: renderPrescriptionCard("DAP", 94.2%, NPK_Advice)</text>
+
+  <g transform="translate(160, 1260)"><rect x="-70" y="0" width="140" height="26" fill="#F8FAFC" stroke="#94A3B8" rx="4"/><text y="18" class="lifeline-name" fill="#475569" style="font-size: 11px;">Farmer / UI</text></g>
+  <g transform="translate(430, 1260)"><rect x="-80" y="0" width="160" height="26" fill="#F8FAFC" stroke="#94A3B8" rx="4"/><text y="18" class="lifeline-name" fill="#475569" style="font-size: 11px;">RecommendationCtrl</text></g>
+  <g transform="translate(720, 1260)"><rect x="-60" y="0" width="120" height="26" fill="#F8FAFC" stroke="#94A3B8" rx="4"/><text y="18" class="lifeline-name" fill="#475569" style="font-size: 11px;">MLClient</text></g>
+  <g transform="translate(1000, 1260)"><rect x="-65" y="0" width="130" height="26" fill="#F8FAFC" stroke="#94A3B8" rx="4"/><text y="18" class="lifeline-name" fill="#475569" style="font-size: 11px;">CircuitBreaker</text></g>
+  <g transform="translate(1290, 1260)"><rect x="-75" y="0" width="150" height="26" fill="#F8FAFC" stroke="#94A3B8" rx="4"/><text y="18" class="lifeline-name" fill="#475569" style="font-size: 11px;">FertilizerPredictor</text></g>
+  <g transform="translate(1570, 1260)"><rect x="-65" y="0" width="130" height="26" fill="#F8FAFC" stroke="#94A3B8" rx="4"/><text y="18" class="lifeline-name" fill="#475569" style="font-size: 11px;">ModelRegistry</text></g>
+  <g transform="translate(1840, 1260)"><rect x="-70" y="0" width="140" height="26" fill="#F8FAFC" stroke="#94A3B8" rx="4"/><text y="18" class="lifeline-name" fill="#475569" style="font-size: 11px;">DatabaseManager</text></g>
+  <g transform="translate(2060, 1260)"><rect x="-70" y="0" width="140" height="26" fill="#F8FAFC" stroke="#94A3B8" rx="4"/><text y="18" class="lifeline-name" fill="#475569" style="font-size: 11px;">Prometheus</text></g>
+
+  <g transform="translate(60, 1315)">
+    <rect width="2080" height="55" class="legend-box"/>
+    <text x="20" y="24" class="legend-text" font-weight="bold">UML 2.5 Sequence Notation Legend:</text>
+    <line x1="260" y1="20" x2="310" y2="20" class="msg-sync"/>
+    <text x="320" y="24" class="legend-text">Synchronous Call (Filled Arrowhead)</text>
+    <line x1="600" y1="20" x2="650" y2="20" class="msg-async"/>
+    <text x="660" y="24" class="legend-text">Asynchronous Signal (Open Arrowhead)</text>
+    <line x1="960" y1="20" x2="1010" y2="20" class="msg-return"/>
+    <text x="1020" y="24" class="legend-text">Reply / Return Message (Dashed Line)</text>
+    <rect x="1330" y="10" width="14" height="22" class="act-bar"/>
+    <text x="1355" y="24" class="legend-text">Execution Specification (Activation Bar)</text>
+    <rect x="1660" y="8" width="50" height="26" class="frame-box"/>
+    <text x="1665" y="24" class="legend-text" font-weight="bold">alt / par</text>
+    <text x="1725" y="24" class="legend-text">Combined Interaction Fragments</text>
+  </g>
+</svg>
